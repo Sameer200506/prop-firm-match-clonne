@@ -1,0 +1,21 @@
+{
+  "slug": "maven-trading",
+  "name": "Maven Trading",
+  "logoInitials": "MV",
+  "vertical": "cfd",
+  "country": "United Arab Emirates",
+  "founded": 2022,
+  "rating": 4.3,
+  "reviewCount": 588,
+  "platforms": ["MT5", "cTrader", "Match-Trade"],
+  "assets": ["fx", "metals", "indices", "energy", "crypto"],
+  "payoutMethods": ["Bank transfer", "Crypto", "Rise"],
+  "leverage": { "fx": "1:100", "metals": "1:20", "indices": "1:10", "crypto": "1:2" },
+  "rules": { "newsTrading": true, "eas": true, "overnight": true, "swapFree": true },
+  "restrictedCountries": ["United States", "Iran", "North Korea"],
+  "maxAllocation": 100000,
+  "lastUpdated": "2026-08-24",
+  "website": "https://maven-trading.com",
+  "summary": "Low-cost entry firm with 1-step evaluations starting around $30, relaxed rules and weekly payout options.",
+  "estimated": false
+}

@@ -1,0 +1,459 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import StarRating from '../../components/StarRating.astro';
+import { formatUsd, formatUsdShort } from '../../utils/format';
+
+export async function getStaticPaths() {
+  const firms = await getCollection('firms');
+  const challenges = await getCollection('challenges');
+
+  const challengeSlugs = new Set(challenges.map((c) => c.data.firm));
+  // Plain code-unit sort — must match the client pickers' default
+  // `[a, b].sort()` so picker URLs can never miss a built page.
+  const eligible = firms
+    .filter((f) => challengeSlugs.has(f.data.slug))
+    .map((f) => f.data)
+    .sort((a, b) => (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0));
+
+  const challengesByFirm = new Map<string, typeof challenges>();
+  for (const c of challenges) {
+    const list = challengesByFirm.get(c.data.firm) ?? [];
+    list.push(c);
+    challengesByFirm.set(c.data.firm, list);
+  }
+
+  const paths = [];
+  for (let i = 0; i < eligible.length; i++) {
+    for (let j = i + 1; j < eligible.length; j++) {
+      paths.push({
+        params: { slug: `${eligible[i].slug}-vs-${eligible[j].slug}` },
+        props: {
+          firmA: eligible[i],
+          firmB: eligible[j],
+          challengesA: challengesByFirm.get(eligible[i].slug) ?? [],
+          challengesB: challengesByFirm.get(eligible[j].slug) ?? [],
+          comparable: eligible,
+        },
+      });
+    }
+  }
+  return paths;
+}
+
+const { firmA, firmB, challengesA, challengesB, comparable } = Astro.props;
+
+const drawdownLabel: Record<string, string> = {
+  static: 'Static',
+  'eod-trailing': 'EOD trailing',
+  'intraday-trailing': 'Intraday trailing',
+  'balance-based': 'Balance-based',
+};
+// Trader-friendliness of drawdown mechanics (higher = kinder).
+const drawdownScore: Record<string, number> = {
+  'balance-based': 3,
+  static: 3,
+  'eod-trailing': 2,
+  'intraday-trailing': 1,
+};
+
+function stats(chs: typeof challengesA) {
+  const prices = chs.map((c) => c.data.discountedPrice ?? c.data.price);
+  const splits = chs.map((c) => c.data.profitSplitPct);
+  const daily = chs.map((c) => c.data.dailyLossPct);
+  const maxLoss = chs.map((c) => c.data.maxLossPct);
+  const dds = [...new Set(chs.map((c) => c.data.drawdownType))];
+  return {
+    minPrice: prices.length ? Math.min(...prices) : null,
+    maxSplit: splits.length ? Math.max(...splits) : null,
+    // 0 = no daily limit and is the friendliest outcome, so prefer it;
+    // otherwise report the tightest daily loss the firm applies.
+    maxDaily: daily.length ? (daily.includes(0) ? 0 : Math.min(...daily)) : null,
+    maxLossBest: maxLoss.length ? Math.max(...maxLoss) : null,
+    drawdowns: dds,
+    ddScore: dds.length ? Math.max(...dds.map((d) => drawdownScore[d])) : 0,
+  };
+}
+
+const sa = stats(challengesA);
+const sb = stats(challengesB);
+
+const leverageFx = (leverage: Record<string, string>): number | null => {
+  const raw = leverage.fx;
+  if (!raw) return null;
+  const n = Number(raw.split(':')[1]);
+  return Number.isFinite(n) ? n : null;
+};
+
+type Winner = 'a' | 'b' | null;
+function higherWins(a: number | null, b: number | null): Winner {
+  if (a === null || b === null || a === b) return null;
+  return a > b ? 'a' : 'b';
+}
+function lowerWins(a: number | null, b: number | null): Winner {
+  if (a === null || b === null || a === b) return null;
+  return a < b ? 'a' : 'b';
+}
+
+interface Row {
+  metric: string;
+  hint?: string;
+  a: string;
+  b: string;
+  winner: Winner;
+}
+
+const rows: Row[] = [
+  {
+    metric: 'Community rating',
+    a: `${firmA.rating.toFixed(1)} / 5`,
+    b: `${firmB.rating.toFixed(1)} / 5`,
+    winner: higherWins(firmA.rating, firmB.rating),
+  },
+  {
+    metric: 'Country',
+    a: firmA.country,
+    b: firmB.country,
+    winner: null,
+  },
+  {
+    metric: 'Max allocation',
+    hint: 'largest funded account offered',
+    a: formatUsdShort(firmA.maxAllocation),
+    b: formatUsdShort(firmB.maxAllocation),
+    winner: higherWins(firmA.maxAllocation, firmB.maxAllocation),
+  },
+  {
+    metric: 'Cheapest challenge',
+    hint: 'lowest fee incl. tracked discounts',
+    a: sa.minPrice !== null ? formatUsd(sa.minPrice) : '—',
+    b: sb.minPrice !== null ? formatUsd(sb.minPrice) : '—',
+    winner: lowerWins(sa.minPrice, sb.minPrice),
+  },
+  {
+    metric: 'Max profit split',
+    a: sa.maxSplit !== null ? `${sa.maxSplit}%` : '—',
+    b: sb.maxSplit !== null ? `${sb.maxSplit}%` : '—',
+    winner: higherWins(sa.maxSplit, sb.maxSplit),
+  },
+  {
+    metric: 'Daily loss buffer',
+    hint: '0% = no daily limit · tightest program shown',
+    a: sa.maxDaily === null ? '—' : sa.maxDaily === 0 ? 'No daily limit' : `${sa.maxDaily}%`,
+    b: sb.maxDaily === null ? '—' : sb.maxDaily === 0 ? 'No daily limit' : `${sb.maxDaily}%`,
+    // no daily limit (0) is the friendliest; otherwise the larger buffer wins
+    winner:
+      sa.maxDaily === null || sb.maxDaily === null || sa.maxDaily === sb.maxDaily
+        ? null
+        : sa.maxDaily === 0
+          ? 'a'
+          : sb.maxDaily === 0
+            ? 'b'
+            : higherWins(sa.maxDaily, sb.maxDaily),
+  },
+  {
+    metric: 'Overall loss buffer',
+    hint: 'max drawdown before breach',
+    a: sa.maxLossBest !== null ? `${sa.maxLossBest}%` : '—',
+    b: sb.maxLossBest !== null ? `${sb.maxLossBest}%` : '—',
+    winner: higherWins(sa.maxLossBest, sb.maxLossBest),
+  },
+  {
+    metric: 'Drawdown type',
+    a: sa.drawdowns.map((d) => drawdownLabel[d]).join(', ') || '—',
+    b: sb.drawdowns.map((d) => drawdownLabel[d]).join(', ') || '—',
+    winner: higherWins(sa.ddScore, sb.ddScore),
+  },
+  {
+    metric: 'Platforms',
+    a: firmA.platforms.join(', ') || '—',
+    b: firmB.platforms.join(', ') || '—',
+    winner: null,
+  },
+  {
+    metric: 'FX leverage',
+    a: leverageFx(firmA.leverage) ? `1:${leverageFx(firmA.leverage)}` : 'n/a',
+    b: leverageFx(firmB.leverage) ? `1:${leverageFx(firmB.leverage)}` : 'n/a',
+    winner: null,
+  },
+  {
+    metric: 'Challenge options',
+    a: String(challengesA.length),
+    b: String(challengesB.length),
+    winner: higherWins(challengesA.length, challengesB.length),
+  },
+];
+
+const winsA = rows.filter((r) => r.winner === 'a').length;
+const winsB = rows.filter((r) => r.winner === 'b').length;
+const verdict =
+  winsA === winsB
+    ? `${firmA.name} and ${firmB.name} trade blows evenly — ${winsA} metric wins each. Pick on style, not score.`
+    : winsA > winsB
+      ? `${firmA.name} takes the edge, ${winsA}–${winsB} on highlighted metrics — though ${firmB.name} still wins the categories that matter most to some traders.`
+      : `${firmB.name} takes the edge, ${winsB}–${winsA} on highlighted metrics — though ${firmA.name} still wins the categories that matter most to some traders.`;
+---
+
+<BaseLayout
+  title={`${firmA.name} vs ${firmB.name} — Head-to-Head Comparison`}
+  description={`Full side-by-side comparison of ${firmA.name} and ${firmB.name}: ratings, fees, profit splits, daily loss limits, drawdown types, platforms and leverage.`}
+>
+  <section class="vs-hero glow-field">
+    <div class="wrap">
+      <p class="kicker rise">Head-to-head</p>
+      <h1 class="rise" style="--d:0.06s">
+        {firmA.name} <span class="vs mono">vs</span> {firmB.name}
+      </h1>
+
+      <!-- PICKER -->
+      <form class="panel picker rise" style="--d:0.12s" id="picker-form">
+        <div class="picker-field">
+          <label for="picker-a">Firm A</label>
+          <select id="picker-a" required>
+            {comparable.map((f) => (
+              <option value={f.slug} selected={f.slug === firmA.slug}>{f.name}</option>
+            ))}
+          </select>
+        </div>
+        <span class="picker-vs mono" aria-hidden="true">VS</span>
+        <div class="picker-field">
+          <label for="picker-b">Firm B</label>
+          <select id="picker-b" required>
+            {comparable.map((f) => (
+              <option value={f.slug} selected={f.slug === firmB.slug}>{f.name}</option>
+            ))}
+          </select>
+        </div>
+        <button class="btn btn-primary picker-go" type="submit">Go →</button>
+        <p class="mono picker-error hidden" id="picker-error">
+          // pick two different firms to compare
+        </p>
+      </form>
+    </div>
+  </section>
+
+  <section class="section vs-section">
+    <div class="wrap">
+      <!-- FIRM HEADER CARDS -->
+      <div class="vs-cards rise" style="--d:0.16s">
+        {[{ firm: firmA, side: 'a' }, { firm: firmB, side: 'b' }].map(({ firm, side }) => (
+          <a class="panel vs-card" href={`/prop-firms/${firm.slug}/`}>
+            <span class="logo-badge" aria-hidden="true">{firm.logoInitials}</span>
+            <div class="vs-card-text">
+              <h3>{firm.name}</h3>
+              <StarRating rating={firm.rating} />
+            </div>
+            <span class="mono win-count">
+              {side === 'a' ? winsA : winsB} wins
+            </span>
+          </a>
+        ))}
+      </div>
+
+      <!-- COMPARISON TABLE -->
+      <div class="panel table-panel rise" style="--d:0.2s">
+        <div class="table-scroll">
+          <table class="data-table vs-table">
+            <thead>
+              <tr>
+                <th scope="col">Metric</th>
+                <th scope="col">{firmA.name}</th>
+                <th scope="col">{firmB.name}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr>
+                  <th scope="row" class="metric-cell">
+                    {row.metric}
+                    {row.hint && <span class="metric-hint">{row.hint}</span>}
+                  </th>
+                  <td class:list={['mono', 'value-cell', { win: row.winner === 'a' }]}>
+                    {row.a}
+                    {row.winner === 'a' && <span class="win-flag">▲ better</span>}
+                  </td>
+                  <td class:list={['mono', 'value-cell', { win: row.winner === 'b' }]}>
+                    {row.b}
+                    {row.winner === 'b' && <span class="win-flag">▲ better</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- VERDICT -->
+      <div class="panel verdict rise" style="--d:0.24s">
+        <p class="kicker">Verdict</p>
+        <p class="verdict-text">{verdict}</p>
+        <div class="verdict-links">
+          <a class="btn btn-ghost" href={`/prop-firms/${firmA.slug}/`}>{firmA.name} profile</a>
+          <a class="btn btn-ghost" href={`/prop-firms/${firmB.slug}/`}>{firmB.name} profile</a>
+          <a class="btn btn-primary" href="/match">Not sure? Take the match quiz</a>
+        </div>
+      </div>
+
+      <p class="mono vs-note">
+        Snapshot 2026-08-24 · “better” flags compare headline numbers only —
+        read the rulebooks before committing.
+      </p>
+    </div>
+  </section>
+
+  <script>
+    const form = document.getElementById('picker-form') as HTMLFormElement | null;
+    if (form) {
+      const a = document.getElementById('picker-a') as HTMLSelectElement;
+      const b = document.getElementById('picker-b') as HTMLSelectElement;
+      const err = document.getElementById('picker-error');
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!a.value || !b.value || a.value === b.value) {
+          err?.classList.remove('hidden');
+          return;
+        }
+        const slug = [a.value, b.value].sort().join('-vs-');
+        window.location.href = `/compare-firms/${slug}/`;
+      });
+    }
+  </script>
+
+  <style>
+    .vs-hero {
+      padding: clamp(48px, 7vw, 84px) 0 clamp(28px, 4vw, 40px);
+      border-bottom: 1px solid var(--line);
+    }
+    .vs-hero h1 {
+      margin-top: 10px;
+      font-size: clamp(1.6rem, 4vw, 2.7rem);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .vs {
+      font-size: 0.55em;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+      border: 1px solid rgba(182, 240, 74, 0.4);
+      border-radius: 6px;
+      padding: 4px 10px;
+    }
+
+    .picker {
+      margin-top: 28px;
+      padding: 18px;
+      display: flex;
+      align-items: end;
+      gap: 16px;
+      flex-wrap: wrap;
+      max-width: 860px;
+    }
+    .picker-field { display: grid; gap: 0.35em; flex: 1; min-width: 190px; }
+    .picker-vs {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+      padding-bottom: 0.7em;
+    }
+    .picker-go { flex: none; font-size: 0.78rem; padding: 0.75em 1.3em; }
+    .picker-error {
+      width: 100%;
+      margin: 0;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      color: var(--loss);
+    }
+
+    .vs-section { padding-top: 36px; }
+
+    .vs-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+    .vs-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 20px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .vs-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+    .vs-card-text { display: grid; gap: 5px; flex: 1; }
+    .vs-card-text h3 { font-size: 1.05rem; }
+    .win-count {
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      border: 1px solid rgba(182, 240, 74, 0.35);
+      border-radius: 999px;
+      padding: 4px 12px;
+      white-space: nowrap;
+    }
+
+    .table-panel { overflow: hidden; }
+    .table-scroll { overflow-x: auto; }
+    .vs-table { min-width: 620px; }
+    .metric-cell {
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: normal;
+      color: var(--text);
+      display: grid;
+      gap: 2px;
+      width: 32%;
+    }
+    .metric-hint {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 400;
+      color: var(--faint);
+      letter-spacing: 0.04em;
+    }
+    .value-cell { width: 34%; font-size: 0.92rem; }
+    .value-cell.win {
+      color: var(--accent);
+      font-weight: 600;
+      background: rgba(182, 240, 74, 0.05);
+    }
+    .win-flag {
+      display: inline-block;
+      margin-left: 10px;
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-ink);
+      background: var(--accent);
+      border-radius: 4px;
+      padding: 2px 7px;
+      vertical-align: 1px;
+    }
+
+    .verdict {
+      margin-top: 20px;
+      padding: 28px;
+      display: grid;
+      gap: 14px;
+      justify-items: start;
+    }
+    .verdict-text { max-width: 70ch; color: var(--text); font-size: 1.02rem; }
+    .verdict-links { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    .vs-note {
+      margin-top: 18px;
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      color: var(--faint);
+    }
+
+    @media (max-width: 640px) {
+      .vs-cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</BaseLayout>

@@ -1,0 +1,21 @@
+{
+  "slug": "funded-trading-plus",
+  "name": "Funded Trading Plus",
+  "logoInitials": "FT+",
+  "vertical": "cfd",
+  "country": "United Kingdom",
+  "founded": 2022,
+  "rating": 4.3,
+  "reviewCount": 654,
+  "platforms": ["MT5", "Match-Trade"],
+  "assets": ["fx", "metals", "indices", "crypto"],
+  "payoutMethods": ["Bank transfer", "Crypto"],
+  "leverage": { "fx": "1:100", "metals": "1:20", "indices": "1:15", "crypto": "1:2" },
+  "rules": { "newsTrading": true, "eas": true, "overnight": true, "swapFree": false },
+  "restrictedCountries": ["United States", "Iran", "North Korea"],
+  "maxAllocation": 100000,
+  "lastUpdated": "2026-08-24",
+  "website": "https://fundedtradingplus.com",
+  "summary": "UK firm offering 1-step and instant funding programs up to $100K with no time limits on evaluations.",
+  "estimated": false
+}

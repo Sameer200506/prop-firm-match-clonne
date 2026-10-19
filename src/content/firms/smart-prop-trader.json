@@ -1,0 +1,19 @@
+{
+  "slug": "smart-prop-trader",
+  "name": "Smart Prop Trader",
+  "logoInitials": "SP",
+  "vertical": "cfd",
+  "country": "United Kingdom",
+  "founded": 2022,
+  "rating": 4.0,
+  "reviewCount": 121,
+  "platforms": ["MT5"],
+  "assets": ["fx", "metals", "indices"],
+  "leverage": { "fx": "1:100", "metals": "1:20", "indices": "1:20" },
+  "restrictedCountries": ["United States"],
+  "maxAllocation": 100000,
+  "lastUpdated": "2026-08-24",
+  "website": "https://smartproptrader.com",
+  "summary": "Directory listing: UK 2-step CFD evaluations with static drawdown and scaling up to $500K.",
+  "estimated": true
+}

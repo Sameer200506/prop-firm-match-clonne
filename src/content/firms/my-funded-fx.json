@@ -1,0 +1,19 @@
+{
+  "slug": "my-funded-fx",
+  "name": "My Funded FX",
+  "logoInitials": "MF",
+  "vertical": "cfd",
+  "country": "United States",
+  "founded": 2022,
+  "rating": 4.2,
+  "reviewCount": 268,
+  "platforms": ["MT5"],
+  "assets": ["fx", "metals", "indices"],
+  "leverage": { "fx": "1:100", "metals": "1:20", "indices": "1:20" },
+  "restrictedCountries": [],
+  "maxAllocation": 300000,
+  "lastUpdated": "2026-08-24",
+  "website": "https://myfundedfx.com",
+  "summary": "Directory listing: 2-step and instant FX programs up to $300K with balance-based drawdown.",
+  "estimated": true
+}

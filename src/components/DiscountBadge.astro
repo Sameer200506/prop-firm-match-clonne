@@ -1,0 +1,46 @@
+---
+interface Props {
+  code: string;
+  percentOff: number;
+  compact?: boolean;
+}
+
+const { code, percentOff, compact = false } = Astro.props;
+---
+
+<span class:list={['badge', { compact }]} title={`Use code ${code} for ${percentOff}% off`}>
+  <span class="pct mono">-{percentOff}%</span>
+  <span class="code mono">{code}</span>
+</span>
+
+<style>
+  .badge {
+    display: inline-flex;
+    align-items: stretch;
+    border-radius: 7px;
+    overflow: hidden;
+    border: 1px solid rgba(182, 240, 74, 0.45);
+    box-shadow: 0 0 0 3px rgba(182, 240, 74, 0.06);
+    white-space: nowrap;
+    flex: none;
+  }
+  .pct {
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 600;
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    display: grid;
+    place-items: center;
+  }
+  .code {
+    background: rgba(182, 240, 74, 0.09);
+    color: var(--accent);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    padding: 3px 9px;
+    display: grid;
+    place-items: center;
+  }
+  .compact .pct, .compact .code { font-size: 0.64rem; padding: 2px 6px; }
+</style>

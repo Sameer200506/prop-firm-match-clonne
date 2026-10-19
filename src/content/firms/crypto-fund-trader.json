@@ -1,0 +1,19 @@
+{
+  "slug": "crypto-fund-trader",
+  "name": "Crypto Fund Trader",
+  "logoInitials": "CF",
+  "vertical": "cfd",
+  "country": "Global",
+  "founded": 2022,
+  "rating": 4.2,
+  "reviewCount": 187,
+  "platforms": ["MT5"],
+  "assets": ["fx", "crypto", "indices"],
+  "leverage": { "fx": "1:100", "crypto": "1:2", "indices": "1:20" },
+  "restrictedCountries": [],
+  "maxAllocation": 100000,
+  "lastUpdated": "2026-08-24",
+  "website": "https://cryptofundtrader.com",
+  "summary": "Directory listing: crypto-friendly evaluations with 2-step and 3-step routes and weekend holding allowed.",
+  "estimated": true
+}

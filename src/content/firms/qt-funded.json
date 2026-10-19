@@ -1,0 +1,19 @@
+{
+  "slug": "qt-funded",
+  "name": "QT Funded",
+  "logoInitials": "QT",
+  "vertical": "cfd",
+  "country": "Global",
+  "founded": 2023,
+  "rating": 3.9,
+  "reviewCount": 96,
+  "platforms": ["MT5"],
+  "assets": ["fx", "metals", "indices"],
+  "leverage": { "fx": "1:100", "metals": "1:20", "indices": "1:20" },
+  "restrictedCountries": ["United States"],
+  "maxAllocation": 100000,
+  "lastUpdated": "2026-08-24",
+  "website": "https://qtfunded.com",
+  "summary": "Directory listing: low-cost 2-step CFD evaluations with static drawdown and biweekly payouts.",
+  "estimated": true
+}

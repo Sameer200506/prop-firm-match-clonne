@@ -1,0 +1,19 @@
+{
+  "slug": "brightfunded",
+  "name": "BrightFunded",
+  "logoInitials": "BF",
+  "vertical": "cfd",
+  "country": "Netherlands",
+  "founded": 2023,
+  "rating": 4.0,
+  "reviewCount": 142,
+  "platforms": ["MT5", "cTrader", "Match-Trade"],
+  "assets": ["fx", "metals", "indices", "crypto"],
+  "leverage": { "fx": "1:100", "metals": "1:20", "indices": "1:20", "crypto": "1:2" },
+  "restrictedCountries": ["United States"],
+  "maxAllocation": 200000,
+  "lastUpdated": "2026-08-24",
+  "website": "https://brightfunded.com",
+  "summary": "Directory listing: Dutch 2-step firm with a tokenised scaling plan and up to 90% profit split.",
+  "estimated": true
+}

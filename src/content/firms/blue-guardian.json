@@ -1,0 +1,22 @@
+{
+  "slug": "blue-guardian",
+  "name": "Blue Guardian",
+  "logoInitials": "BG",
+  "vertical": "cfd",
+  "country": "Australia",
+  "founded": 2023,
+  "rating": 4.4,
+  "reviewCount": 731,
+  "platforms": ["MT5", "cTrader", "Guardian PRO"],
+  "assets": ["fx", "metals", "indices", "energy", "crypto"],
+  "payoutMethods": ["Bank transfer", "Crypto"],
+  "leverage": { "fx": "1:100", "metals": "1:20", "indices": "1:20", "crypto": "1:2" },
+  "rules": { "newsTrading": true, "eas": true, "overnight": true, "swapFree": false },
+  "restrictedCountries": ["United States", "Iran", "North Korea"],
+  "discount": { "code": "GUARD8", "percentOff": 8 },
+  "maxAllocation": 250000,
+  "lastUpdated": "2026-08-24",
+  "website": "https://blueguardian.io",
+  "summary": "Australian firm featuring a 9% single-step target, the Guardian Shield drawdown protector and 100% of the first $15K in profits before a 90/10 split.",
+  "estimated": false
+}

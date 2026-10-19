@@ -1,0 +1,19 @@
+{
+  "slug": "finotive-funding",
+  "name": "Finotive Funding",
+  "logoInitials": "FF",
+  "vertical": "cfd",
+  "country": "United States",
+  "founded": 2024,
+  "rating": 4.0,
+  "reviewCount": 88,
+  "platforms": ["MT5", "Match-Trade"],
+  "assets": ["fx", "metals", "indices", "crypto"],
+  "leverage": { "fx": "1:100", "metals": "1:20", "indices": "1:20", "crypto": "1:2" },
+  "restrictedCountries": [],
+  "maxAllocation": 100000,
+  "lastUpdated": "2026-08-24",
+  "website": "https://finotivefunding.com",
+  "summary": "Directory listing: newer CFD firm offering 1-step and 2-step evaluations with a fixed drawdown model.",
+  "estimated": true
+}

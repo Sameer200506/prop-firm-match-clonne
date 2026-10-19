@@ -1,0 +1,152 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FirmCard from '../components/FirmCard.astro';
+import { formatUsd, formatUsdShort } from '../utils/format';
+
+const firms = await getCollection('firms');
+const challenges = await getCollection('challenges');
+
+const futuresFirms = firms
+  .filter((f) => f.data.vertical === 'futures' || f.data.vertical === 'both')
+  .sort((a, b) => b.data.rating - a.data.rating || b.data.reviewCount - a.data.reviewCount)
+  .map((f) => f.data);
+
+const futuresChallengeCount = challenges.filter((c) =>
+  futuresFirms.some((f) => f.slug === c.data.firm),
+).length;
+const futuresPrices = challenges
+  .filter((c) => futuresFirms.some((f) => f.slug === c.data.firm))
+  .map((c) => c.data.discountedPrice ?? c.data.price);
+// Guard against empty datasets — Math.min/max over [] yields ±Infinity.
+const cheapest = futuresPrices.length ? Math.min(...futuresPrices) : null;
+const biggest = futuresFirms.length
+  ? Math.max(...futuresFirms.map((f) => f.maxAllocation))
+  : null;
+---
+
+<BaseLayout
+  title="Best Futures Prop Firms — Funded Futures Evaluations"
+  description="The futures vertical, ranked: compare funded futures evaluations from Topstep, Apex and more — fees, drawdown types, payout cadence and platform support."
+>
+  <section class="fut-hero glow-field">
+    <div class="wrap">
+      <p class="kicker rise">The futures vertical</p>
+      <h1 class="rise" style="--d:0.06s">
+        Funded <span class="accent-text">futures</span> firms,<br />ranked
+      </h1>
+      <p class="fut-sub rise" style="--d:0.12s">
+        Futures evaluations trade on real exchange data — centralized volume,
+        transparent pricing and no broker-side conflicts. You prove yourself on
+        contracts like the ES, NQ and CL; the firm supplies the capital and you
+        keep the majority of the profits. Below: every futures program we track,
+        ordered by trader rating.
+      </p>
+      <div class="fut-stats rise mono" style="--d:0.18s">
+        <span>{futuresFirms.length} firms</span>
+        <span class="sep">//</span>
+        <span>{futuresChallengeCount} evaluations</span>
+        <span class="sep">//</span>
+        <span>from {cheapest !== null ? formatUsd(cheapest) : 'n/a'} entry</span>
+        <span class="sep">//</span>
+        <span>up to {biggest !== null ? formatUsdShort(biggest) : 'n/a'} funded</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Ranked by traders</p>
+          <h2>Futures prop firms</h2>
+        </div>
+        <p class="muted mono head-note">futures &amp; hybrid firms only</p>
+      </div>
+
+      <div class="firm-grid">
+        {futuresFirms.map((firm, i) => (
+          <FirmCard firm={firm} rank={i + 1} delay={0.04 * (i % 3)} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section fut-explainer">
+    <div class="wrap explainer-grid">
+      <div class="panel explainer">
+        <p class="kicker">How it works</p>
+        <h2>Evaluation, then capital</h2>
+        <p>
+          Most futures firms run a single-step evaluation: hit a modest profit
+          target while respecting a drawdown limit, usually tracked against
+          your account equity. Pass, pay an activation or reset fee structure
+          that suits you, and trade the firm's money on simulated exchange
+          feeds with real payout mechanics behind them.
+        </p>
+      </div>
+      <div class="panel explainer">
+        <p class="kicker">Know the drawdown</p>
+        <h2>Trailing vs static</h2>
+        <p>
+          The defining rule in futures is the drawdown type. Intraday trailing
+          follows your open equity tick by tick; EOD trailing only locks in at
+          the close; static limits never move. EOD and static give swing-style
+          room to breathe — intraday trailing demands tighter risk control but
+          often comes with cheaper fees.
+        </p>
+      </div>
+      <div class="panel explainer">
+        <p class="kicker">Payouts</p>
+        <h2>Getting paid</h2>
+        <p>
+          Futures payouts commonly unlock after a minimum number of winning
+          days or a fixed calendar cycle, with splits typically ranging from
+          80% to 90%. Compare payout cadence and consistency rules before you
+          commit — they shape how fast profits reach your bank account.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .fut-hero {
+      padding: clamp(56px, 8vw, 100px) 0 clamp(36px, 5vw, 56px);
+      border-bottom: 1px solid var(--line);
+    }
+    .fut-hero h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); }
+    .fut-sub { margin-top: 16px; color: var(--muted); max-width: 66ch; }
+    .fut-stats {
+      margin-top: 26px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      color: var(--text);
+    }
+    .fut-stats .sep { color: var(--faint); }
+
+    .firm-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .head-note { font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    .fut-explainer { padding-top: 0; }
+    .explainer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .explainer { padding: 26px; display: grid; gap: 12px; justify-items: start; }
+    .explainer h2 { font-size: 1.1rem; }
+    .explainer p:last-child { color: var(--muted); font-size: 0.9rem; }
+
+    @media (max-width: 640px) {
+      .fut-stats { gap: 8px; font-size: 0.72rem; }
+    }
+  </style>
+</BaseLayout>

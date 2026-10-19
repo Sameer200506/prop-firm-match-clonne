@@ -1,0 +1,21 @@
+{
+  "slug": "lucid-trading",
+  "name": "Lucid Trading",
+  "logoInitials": "LT",
+  "vertical": "futures",
+  "country": "United States",
+  "founded": 2023,
+  "rating": 4.5,
+  "reviewCount": 619,
+  "platforms": ["Tradovate", "NinjaTrader", "Rithmic", "TradingView"],
+  "assets": ["indices", "energy", "metals"],
+  "payoutMethods": ["Bank transfer (ACH)", "PayPal"],
+  "leverage": { "indices": "1:20", "energy": "1:15" },
+  "rules": { "newsTrading": true, "eas": true, "overnight": true, "swapFree": false },
+  "restrictedCountries": ["Iran", "North Korea", "Cuba"],
+  "maxAllocation": 150000,
+  "lastUpdated": "2026-08-24",
+  "website": "https://lucidtrading.com",
+  "summary": "Futures firm praised for fast payouts and trader-friendly EOD trailing drawdown rules on its LucidFlex and LucidPro evaluations.",
+  "estimated": false
+}

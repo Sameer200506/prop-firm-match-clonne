@@ -1,0 +1,257 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FilterBar from '../../components/FilterBar.astro';
+import StarRating from '../../components/StarRating.astro';
+import DiscountBadge from '../../components/DiscountBadge.astro';
+import { formatUsdShort, yearsActive } from '../../utils/format';
+
+const firms = await getCollection('firms');
+const challenges = await getCollection('challenges');
+
+const challengesByFirm = new Map<string, typeof challenges>();
+for (const c of challenges) {
+  const list = challengesByFirm.get(c.data.firm) ?? [];
+  list.push(c);
+  challengesByFirm.set(c.data.firm, list);
+}
+
+// Directory rows, ranked by rating then review count.
+const rows = [...firms]
+  .sort(
+    (a, b) =>
+      b.data.rating - a.data.rating || b.data.reviewCount - a.data.reviewCount,
+  )
+  .map((firm, index) => {
+    const firmChallenges = challengesByFirm.get(firm.data.slug) ?? [];
+    const maxSplit = firmChallenges.length
+      ? Math.max(...firmChallenges.map((c) => c.data.profitSplitPct))
+      : null;
+    const steps = [...new Set(firmChallenges.map((c) => c.data.steps))].sort();
+    const searchText = [
+      firm.data.name,
+      firm.data.country,
+      firm.data.vertical,
+      ...firm.data.platforms,
+      ...firm.data.assets,
+    ]
+      .join(' ')
+      .toLowerCase();
+
+    return { firm: firm.data, rank: index + 1, maxSplit, steps, searchText };
+  });
+
+const currentYear = new Date().getFullYear();
+---
+
+<BaseLayout
+  title="All Prop Firms — Directory"
+  description="Browse and filter the full directory of prop trading firms: rank, ratings, country, assets, platforms, max allocation and active promo codes."
+>
+  <section class="dir-hero glow-field">
+    <div class="wrap dir-hero-inner">
+      <div>
+        <p class="kicker rise">The directory</p>
+        <h1 class="rise" style="--d:0.08s">All prop firms</h1>
+        <p class="dir-sub rise" style="--d:0.14s">
+          {rows.length} firms ranked by trader rating. Filter by vertical,
+          account size, profit split, challenge structure and discounts —
+          everything updates instantly.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section dir-section">
+    <div class="wrap dir-grid">
+      <FilterBar />
+
+      <div class="panel table-panel rise" style="--d:0.1s">
+        <div class="table-scroll">
+          <table class="data-table dir-table" id="dir-table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Firm</th>
+                <th scope="col">Country</th>
+                <th scope="col">Active</th>
+                <th scope="col">Assets</th>
+                <th scope="col">Platforms</th>
+                <th scope="col">Max alloc.</th>
+                <th scope="col">Promo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr
+                  data-vertical={row.firm.vertical}
+                  data-assets={row.firm.assets.join(',')}
+                  data-max-alloc={row.firm.maxAllocation}
+                  data-max-split={row.maxSplit ?? ''}
+                  data-steps={row.steps.join(',')}
+                  data-discount={row.firm.discount ? '1' : '0'}
+                  data-search={row.searchText}
+                >
+                  <td class="mono rank-cell">{row.rank}</td>
+                  <td>
+                    <div class="firm-cell">
+                      <span class="logo-badge sm" aria-hidden="true">{row.firm.logoInitials}</span>
+                      <div class="firm-cell-text">
+                        <span class="firm-name">
+                          <a class="firm-name-link" href={`/prop-firms/${row.firm.slug}/`}>
+                            {row.firm.name}
+                          </a>
+                          <span class={`tag tag-${row.firm.vertical}`}>{row.firm.vertical}</span>
+                          {row.firm.estimated && <span class="tag est-tag" title="Approximate figures">≈</span>}
+                        </span>
+                        <span class="firm-sub">
+                          <StarRating rating={row.firm.rating} showValue={true} />
+                          <span class="mono review-count">
+                            {row.firm.reviewCount.toLocaleString('en-US')} reviews
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{row.firm.country}</td>
+                  <td class="mono">{yearsActive(row.firm.founded, currentYear)} yrs</td>
+                  <td class="mono small-cell">{row.firm.assets.join(', ')}</td>
+                  <td class="mono small-cell">{row.firm.platforms.join(', ')}</td>
+                  <td class="mono">{formatUsdShort(row.firm.maxAllocation)}</td>
+                  <td>
+                    {row.firm.discount ? (
+                      <DiscountBadge
+                        code={row.firm.discount.code}
+                        percentOff={row.firm.discount.percentOff}
+                        compact
+                      />
+                    ) : (
+                      <span class="mono no-promo">—</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="empty-note mono hidden" id="dir-empty">
+          // no firms match the current filters — try widening your search
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Vanilla-JS directory filtering over the server-rendered rows.
+    const table = document.getElementById('dir-table');
+    if (table) {
+      const rows = Array.from(table.querySelectorAll<HTMLTableRowElement>('tbody tr'));
+      const search = document.getElementById('filter-search') as HTMLInputElement;
+      const vertical = document.getElementById('filter-vertical') as HTMLSelectElement;
+      const minAccount = document.getElementById('filter-min-account') as HTMLSelectElement;
+      const minSplit = document.getElementById('filter-min-split') as HTMLSelectElement;
+      const steps = document.getElementById('filter-steps') as HTMLSelectElement;
+      const discount = document.getElementById('filter-discount') as HTMLInputElement;
+      const resetBtn = document.getElementById('filter-reset') as HTMLButtonElement;
+      const countEl = document.getElementById('filter-count');
+      const emptyEl = document.getElementById('dir-empty');
+
+      // Seed the vertical filter from ?vertical= (header tabs).
+      const param = new URLSearchParams(window.location.search).get('vertical');
+      if (param && [...vertical.options].some((o) => o.value === param)) {
+        vertical.value = param;
+      }
+
+      function applyFilters(): void {
+        const q = search.value.trim().toLowerCase();
+        const v = vertical.value;
+        const acc = minAccount.value ? Number(minAccount.value) : 0;
+        const split = minSplit.value ? Number(minSplit.value) : 0;
+        const stepVal = steps.value;
+        const needsDiscount = discount.checked;
+
+        let visible = 0;
+        for (const row of rows) {
+          // 'crypto' is assets-based (any firm offering crypto), not a vertical.
+          const okVertical =
+            !v ||
+            (v === 'crypto'
+              ? (row.dataset.assets ?? '').split(',').includes('crypto')
+              : row.dataset.vertical === v);
+          const okAccount = Number(row.dataset.maxAlloc ?? 0) >= acc;
+          const rowSplit = row.dataset.maxSplit;
+          const okSplit = split === 0 || (rowSplit !== '' && Number(rowSplit) >= split);
+          const rowSteps = (row.dataset.steps ?? '').split(',').filter(Boolean);
+          const okSteps = !stepVal || rowSteps.includes(stepVal);
+          const okDiscount = !needsDiscount || row.dataset.discount === '1';
+          const okSearch = !q || (row.dataset.search ?? '').includes(q);
+
+          const show = okVertical && okAccount && okSplit && okSteps && okDiscount && okSearch;
+          row.classList.toggle('hidden', !show);
+          if (show) visible += 1;
+        }
+
+        if (countEl) {
+          countEl.textContent = `// ${visible} of ${rows.length} firms shown`;
+        }
+        if (emptyEl) {
+          emptyEl.classList.toggle('hidden', visible !== 0);
+        }
+      }
+
+      [search, vertical, minAccount, minSplit, steps, discount].forEach((el) => {
+        el?.addEventListener('input', applyFilters);
+        el?.addEventListener('change', applyFilters);
+      });
+      resetBtn?.addEventListener('click', () => {
+        search.value = '';
+        vertical.value = '';
+        minAccount.value = '';
+        minSplit.value = '';
+        steps.value = '';
+        discount.checked = false;
+        applyFilters();
+      });
+
+      applyFilters();
+    }
+  </script>
+
+  <style>
+    .dir-hero {
+      padding: clamp(48px, 7vw, 84px) 0 clamp(28px, 4vw, 44px);
+      border-bottom: 1px solid var(--line);
+    }
+    .dir-hero h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); }
+    .dir-sub { margin-top: 12px; color: var(--muted); max-width: 60ch; }
+
+    .dir-section { padding-top: 32px; }
+    .dir-grid { display: grid; gap: 20px; align-items: start; }
+
+    .table-panel { overflow: hidden; }
+    .table-scroll { overflow-x: auto; }
+    .dir-table td { font-size: 0.9rem; }
+    .dir-table th { position: sticky; top: 0; background: var(--panel-2); }
+    .rank-cell { color: var(--faint); font-size: 0.8rem; }
+
+    .firm-cell { display: flex; align-items: center; gap: 12px; min-width: 230px; }
+    .logo-badge.sm { width: 38px; height: 38px; font-size: 0.72rem; border-radius: 10px; }
+    .firm-cell-text { display: grid; gap: 3px; }
+    .firm-name { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; flex-wrap: wrap; }
+    .firm-name-link { color: var(--text); transition: color 0.15s ease; }
+    .firm-name-link:hover { color: var(--accent); }
+    .est-tag { color: var(--amber); border-color: rgba(255, 180, 84, 0.4); }
+    .firm-sub { display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .review-count { font-size: 0.7rem; color: var(--faint); }
+    .small-cell { font-size: 0.78rem; color: var(--muted); max-width: 160px; }
+    .no-promo { color: var(--faint); }
+
+    .empty-note {
+      margin: 0;
+      padding: 22px 18px;
+      font-size: 0.8rem;
+      color: var(--amber);
+      border-top: 1px dashed var(--line);
+    }
+  </style>
+</BaseLayout>

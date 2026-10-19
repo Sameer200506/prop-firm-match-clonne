@@ -1,0 +1,691 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const firms = await getCollection('firms');
+const challenges = await getCollection('challenges');
+
+// Build a compact per-firm projection the client-side scoring engine can chew on.
+const projection = firms.map((f) => {
+  const chs = challenges.filter((c) => c.data.firm === f.data.slug);
+  const prices = chs.map((c) => c.data.discountedPrice ?? c.data.price);
+  const dds = [...new Set(chs.map((c) => c.data.drawdownType))];
+  const fxRaw = f.data.leverage.fx;
+  return {
+    slug: f.data.slug,
+    name: f.data.name,
+    logoInitials: f.data.logoInitials,
+    country: f.data.country,
+    vertical: f.data.vertical,
+    rating: f.data.rating,
+    reviewCount: f.data.reviewCount,
+    maxAllocation: f.data.maxAllocation,
+    assets: f.data.assets,
+    rules: f.data.rules,
+    fxLev: fxRaw ? Number(fxRaw.split(':')[1]) : null,
+    minPrice: prices.length ? Math.min(...prices) : null,
+    maxSplit: chs.length ? Math.max(...chs.map((c) => c.data.profitSplitPct)) : null,
+    steps: [...new Set(chs.map((c) => c.data.steps))],
+    ddFriendly: chs.length ? !dds.includes('intraday-trailing') : null,
+    maxLossMax: chs.length ? Math.max(...chs.map((c) => c.data.maxLossPct)) : null,
+    dailyLossMax: chs.length ? Math.max(...chs.map((c) => c.data.dailyLossPct)) : null,
+  };
+});
+---
+
+<BaseLayout
+  title="Prop Firm Match Quiz — Find Your Funded Account"
+  description="Answer 6 questions about capital, experience, trading style, risk tolerance and asset preferences — our weighted engine ranks the prop firms that fit you best."
+>
+  <section class="quiz-hero glow-field">
+    <div class="wrap">
+      <p class="kicker rise">The match engine</p>
+      <h1 class="rise" style="--d:0.06s">
+        Which firm fits<br /><span class="accent-text">your trading?</span>
+      </h1>
+      <p class="quiz-sub rise" style="--d:0.12s">
+        Six questions. A weighted scoring engine over {projection.length} firms.
+        Your personal top-5 shortlist with match percentages — no email, no spam.
+      </p>
+    </div>
+  </section>
+
+  <section class="section quiz-section">
+    <div class="wrap quiz-shell">
+      <!-- QUIZ STAGE -->
+      <div class="panel quiz-card rise" style="--d:0.16s" id="quiz-card">
+        <header class="quiz-top">
+          <p class="mono quiz-progress-label" id="progress-label">Q1 / 6</p>
+          <div class="progress-track" aria-hidden="true">
+            <span class="progress-fill" id="progress-fill"></span>
+          </div>
+          <button class="mono quiz-back" id="btn-back" type="button" hidden>← back</button>
+        </header>
+
+        <div id="question-slot">
+          <!-- rendered by the quiz engine -->
+        </div>
+
+        <footer class="quiz-actions">
+          <button class="btn btn-primary" id="btn-next" type="button" disabled>
+            Next →
+          </button>
+        </footer>
+      </div>
+
+      <!-- RESULTS STAGE -->
+      <div class="results hidden" id="results" aria-live="polite">
+        <div class="results-head">
+          <div>
+            <p class="kicker">Your shortlist</p>
+            <h2>Top matches</h2>
+          </div>
+          <button class="btn btn-ghost" id="btn-restart" type="button">↺ Restart quiz</button>
+        </div>
+        <ol class="results-list" id="results-list"></ol>
+        <p class="mono results-note">
+          Match % is a weighted fit score across your six answers — not a
+          quality rating. Verify rules with each firm before buying.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Firm projection for the scoring engine (built from content collections). -->
+  <script is:inline type="application/json" id="firm-projection" set:html={JSON.stringify(projection).replace(/</g, '\\u003c')} />
+
+  <script>
+    interface FirmProj {
+      slug: string;
+      name: string;
+      logoInitials: string;
+      country: string;
+      vertical: 'cfd' | 'futures' | 'both';
+      rating: number;
+      reviewCount: number;
+      maxAllocation: number;
+      assets: string[];
+      rules: {
+        newsTrading: boolean | 'restricted';
+        eas: boolean | 'restricted';
+        overnight: boolean | 'restricted';
+        swapFree: boolean | 'restricted';
+      };
+      fxLev: number | null;
+      minPrice: number | null;
+      maxSplit: number | null;
+      steps: number[];
+      ddFriendly: boolean | null;
+      maxLossMax: number | null;
+      dailyLossMax: number | null;
+    }
+
+    const firms: FirmProj[] = JSON.parse(
+      document.getElementById('firm-projection')!.textContent ?? '[]',
+    );
+
+    /* ---------- question definitions ---------- */
+    interface Option { value: string; label: string; hint?: string }
+    interface Question {
+      key: 'capital' | 'experience' | 'style' | 'risk' | 'assets' | 'rules';
+      title: string;
+      sub: string;
+      multi?: boolean;
+      options: Option[];
+    }
+
+    const QUESTIONS: Question[] = [
+      {
+        key: 'capital',
+        title: 'Starting capital',
+        sub: 'How much can you put toward a challenge fee right now?',
+        options: [
+          { value: 'under-500', label: 'Under $500', hint: 'keep it lean' },
+          { value: 'mid', label: '$500 – $2,000', hint: 'standard entry' },
+          { value: 'over-2k', label: '$2,000+', hint: 'serious sizing' },
+        ],
+      },
+      {
+        key: 'experience',
+        title: 'Experience level',
+        sub: 'How long have you been trading consistently?',
+        options: [
+          { value: 'beginner', label: 'Beginner', hint: 'under a year' },
+          { value: 'intermediate', label: 'Intermediate', hint: '1–3 years' },
+          { value: 'pro', label: 'Advanced', hint: '3+ profitable years' },
+        ],
+      },
+      {
+        key: 'style',
+        title: 'Trading style',
+        sub: 'How do you spend your time in the markets?',
+        options: [
+          { value: 'scalping', label: 'Scalping', hint: 'seconds to minutes' },
+          { value: 'day', label: 'Day trading', hint: 'flat by the close' },
+          { value: 'swing', label: 'Swing', hint: 'days to weeks' },
+          { value: 'position', label: 'Position', hint: 'weeks to months' },
+        ],
+      },
+      {
+        key: 'risk',
+        title: 'Risk tolerance',
+        sub: 'How much breathing room do you need on drawdown?',
+        options: [
+          { value: 'conservative', label: 'Conservative', hint: 'wide buffers, calm rules' },
+          { value: 'moderate', label: 'Moderate', hint: 'balanced' },
+          { value: 'aggressive', label: 'Aggressive', hint: 'tight is fine, size big' },
+        ],
+      },
+      {
+        key: 'assets',
+        title: 'Asset class preference',
+        sub: 'What do you actually trade?',
+        options: [
+          { value: 'forex', label: 'Forex & metals' },
+          { value: 'indices', label: 'Indices' },
+          { value: 'crypto', label: 'Crypto' },
+          { value: 'futures', label: 'Exchange-traded futures' },
+          { value: 'anything', label: 'Anything liquid' },
+        ],
+      },
+      {
+        key: 'rules',
+        title: 'Rules you need',
+        sub: 'Tick everything you rely on — skip if none apply.',
+        multi: true,
+        options: [
+          { value: 'newsTrading', label: 'News trading allowed' },
+          { value: 'eas', label: 'EAs / algo trading allowed' },
+          { value: 'overnight', label: 'Overnight & weekend holds' },
+          { value: 'swapFree', label: 'Swap-free accounts' },
+        ],
+      },
+    ];
+
+    /* ---------- scoring helpers ---------- */
+    const clamp01 = (x: number): number => Math.max(0, Math.min(1, x));
+    const ruleScore = (v: boolean | 'restricted'): number =>
+      v === true ? 1 : v === 'restricted' ? 0.45 : 0;
+
+    function fmtShort(v: number): string {
+      if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+      return `$${Math.round(v / 1000)}K`;
+    }
+
+    interface SubScore { s: number; why: string | null }
+
+    const WEIGHTS: Record<Question['key'], number> = {
+      capital: 1.0,
+      experience: 0.8,
+      style: 1.2,
+      risk: 0.8,
+      assets: 1.3,
+      rules: 1.0,
+    };
+
+    function scoreCapital(f: FirmProj, opt: string): SubScore {
+      if (opt === 'under-500') {
+        if (f.minPrice === null) return { s: 0.3, why: null };
+        const s = clamp01(1.25 - f.minPrice / 400);
+        return { s, why: s > 0.55 ? `Entry from $${f.minPrice} — fits a lean bankroll` : null };
+      }
+      if (opt === 'mid') {
+        if (f.minPrice === null) return { s: 0.4, why: null };
+        return { s: clamp01(1 - Math.abs(f.minPrice - 450) / 900), why: null };
+      }
+      const s = clamp01(0.5 + (f.maxAllocation / 2_000_000) * 0.6);
+      return {
+        s,
+        why: f.maxAllocation >= 400_000 ? `Scale up to ${fmtShort(f.maxAllocation)} once proven` : null,
+      };
+    }
+
+    function scoreExperience(f: FirmProj, opt: string): SubScore {
+      const trust = 0.55 * (f.rating / 5) + 0.25 * Math.min(f.reviewCount / 3000, 1);
+      if (opt === 'beginner') {
+        const dd = f.ddFriendly === null ? 0.6 : f.ddFriendly ? 1 : 0.4;
+        return {
+          s: clamp01(trust + 0.2 * dd),
+          why: f.rating >= 4.6 ? `Rated ${f.rating}/5 by ${f.reviewCount.toLocaleString('en-US')} traders — a safe first firm` : null,
+        };
+      }
+      if (opt === 'intermediate') {
+        const split = f.maxSplit !== null ? f.maxSplit / 100 : 0.65;
+        return { s: clamp01(0.5 * split + 0.5 * (f.rating / 5)), why: null };
+      }
+      const split = f.maxSplit !== null ? f.maxSplit / 100 : 0.65;
+      return {
+        s: clamp01(0.5 * clamp01(f.maxAllocation / 2_000_000) + 0.5 * split),
+        why: f.maxSplit !== null && f.maxSplit >= 90 ? `Keep up to ${f.maxSplit}% of what you make` : null,
+      };
+    }
+
+    function scoreStyle(f: FirmProj, opt: string): SubScore {
+      const overnight = ruleScore(f.rules.overnight);
+      const ddFriendly = f.ddFriendly === null ? 0.5 : f.ddFriendly ? 1 : 0.25;
+      if (opt === 'scalping') {
+        const oneStep = f.steps.includes(1) ? 1 : f.steps.length ? 0.6 : 0.4;
+        const venue = f.vertical === 'futures' ? 1 : 0.7;
+        return { s: clamp01(0.5 * oneStep + 0.5 * venue), why: null };
+      }
+      if (opt === 'day') {
+        const oneStep = f.steps.includes(1) ? 1 : f.steps.length ? 0.6 : 0.4;
+        return { s: clamp01(0.5 * oneStep + 0.5 * ddFriendly), why: null };
+      }
+      if (opt === 'swing') {
+        return {
+          s: clamp01(0.45 * overnight + 0.55 * ddFriendly),
+          why: f.rules.overnight === true ? 'Overnight & weekend positions allowed' : null,
+        };
+      }
+      // position
+      return {
+        s: clamp01(
+          0.5 * overnight +
+            0.25 * ruleScore(f.rules.swapFree) +
+            0.25 * clamp01((f.maxLossMax ?? 6) / 10),
+        ),
+        why: f.rules.swapFree === true ? 'Swap-free accounts keep long holds cheap' : null,
+      };
+    }
+
+    function scoreRisk(f: FirmProj, opt: string): SubScore {
+      const ddFriendly = f.ddFriendly === null ? 0.5 : f.ddFriendly ? 1 : 0.2;
+      if (opt === 'conservative') {
+        return {
+          s: clamp01(0.5 * (f.dailyLossMax !== null && f.dailyLossMax > 0 ? 1 : 0.7) + 0.5 * ddFriendly),
+          why: f.ddFriendly ? 'Static / EOD drawdown — no intraday trailing traps' : null,
+        };
+      }
+      if (opt === 'moderate') {
+        return { s: clamp01(0.5 + 0.5 * ddFriendly), why: null };
+      }
+      const buffer = clamp01((f.maxLossMax ?? 6) / 10);
+      const daily =
+        f.dailyLossMax === null ? 0.5 : f.dailyLossMax === 0 ? 1 : f.dailyLossMax >= 5 ? 0.75 : 0.4;
+      return {
+        s: clamp01(0.5 * buffer + 0.5 * daily),
+        why: f.maxLossMax !== null && f.maxLossMax >= 8 ? `Roomy ${f.maxLossMax}% overall loss buffer` : null,
+      };
+    }
+
+    function scoreAssets(f: FirmProj, opt: string): SubScore {
+      if (opt === 'anything') return { s: 0.85, why: null };
+      if (opt === 'forex') {
+        const hit = f.assets.includes('fx') || f.vertical === 'cfd';
+        return { s: hit ? 1 : 0.15, why: hit ? 'Deep FX & metals coverage' : null };
+      }
+      if (opt === 'indices') {
+        const hit = f.assets.includes('indices');
+        return { s: hit ? 1 : 0.2, why: hit ? 'Index CFDs / futures on the menu' : null };
+      }
+      if (opt === 'crypto') {
+        const hit = f.assets.includes('crypto');
+        return { s: hit ? 1 : 0.12, why: hit ? 'Crypto pairs supported' : null };
+      }
+      const hit = f.vertical === 'futures';
+      return {
+        s: hit ? 1 : f.vertical === 'both' ? 0.7 : 0.08,
+        why: hit ? 'Built for exchange-traded futures' : null,
+      };
+    }
+
+    function scoreRules(f: FirmProj, picked: string[]): SubScore {
+      if (picked.length === 0) return { s: 0.6, why: null };
+      let sum = 0;
+      const met: string[] = [];
+      const labels: Record<string, string> = {
+        newsTrading: 'News trading allowed',
+        eas: 'EAs / algos welcome',
+        overnight: 'Hold overnight & weekends',
+        swapFree: 'Swap-free accounts available',
+      };
+      for (const key of picked) {
+        const s = ruleScore(f.rules[key as keyof FirmProj['rules']]);
+        sum += s;
+        if (s === 1) met.push(labels[key]);
+      }
+      return { s: clamp01(sum / picked.length), why: met[0] ?? null };
+    }
+
+    /* ---------- quiz state machine ---------- */
+    const slot = document.getElementById('question-slot')!;
+    const nextBtn = document.getElementById('btn-next') as HTMLButtonElement;
+    const backBtn = document.getElementById('btn-back') as HTMLButtonElement;
+    const progressFill = document.getElementById('progress-fill')!;
+    const progressLabel = document.getElementById('progress-label')!;
+    const quizCard = document.getElementById('quiz-card')!;
+    const resultsBox = document.getElementById('results')!;
+    const resultsList = document.getElementById('results-list')!;
+
+    let step = 0;
+    const answers: Record<string, string[]> = {};
+
+    function renderQuestion(): void {
+      const q = QUESTIONS[step];
+      const selected = new Set(answers[q.key] ?? []);
+      progressLabel.textContent = `Q${step + 1} / ${QUESTIONS.length}`;
+      progressFill.style.width = `${((step + 1) / QUESTIONS.length) * 100}%`;
+      backBtn.hidden = step === 0;
+      nextBtn.textContent = step === QUESTIONS.length - 1 ? 'Get my matches ★' : 'Next →';
+
+      slot.innerHTML = `
+        <p class="q-kicker mono">// question ${step + 1}</p>
+        <h2 class="q-title">${q.title}</h2>
+        <p class="q-sub">${q.sub}</p>
+        <div class="q-options" role="${q.multi ? 'group' : 'radiogroup'}" aria-label="${q.title}">
+          ${q.options
+            .map(
+              (o) => `
+            <button type="button"
+              class="q-opt${selected.has(o.value) ? ' is-selected' : ''}"
+              data-value="${o.value}"
+              role="${q.multi ? 'checkbox' : 'radio'}"
+              aria-checked="${selected.has(o.value)}">
+              <span class="q-opt-label">${o.label}</span>
+              ${o.hint ? `<span class="q-opt-hint mono">${o.hint}</span>` : ''}
+            </button>`,
+            )
+            .join('')}
+        </div>`;
+
+      slot.querySelectorAll<HTMLButtonElement>('.q-opt').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const value = btn.dataset.value ?? '';
+          const cur = answers[q.key] ?? [];
+          if (q.multi) {
+            answers[q.key] = cur.includes(value)
+              ? cur.filter((v) => v !== value)
+              : [...cur, value];
+          } else {
+            answers[q.key] = [value];
+          }
+          renderQuestion();
+        });
+      });
+
+      const chosen = (answers[q.key] ?? []).length > 0;
+      // The final rules question is a multi-select that may legitimately be
+      // skipped ("none apply"), so an empty selection is allowed there only.
+      const skippable = q.multi && step === QUESTIONS.length - 1;
+      nextBtn.disabled = !chosen && !skippable;
+    }
+
+    function runScoring(): { firm: FirmProj; pct: number; reasons: string[] }[] {
+      const get = (key: Question['key']): string[] => answers[key] ?? [];
+
+      return firms
+        .map((f) => {
+          const subs: Record<Question['key'], SubScore> = {
+            capital: scoreCapital(f, get('capital')[0] ?? 'mid'),
+            experience: scoreExperience(f, get('experience')[0] ?? 'intermediate'),
+            style: scoreStyle(f, get('style')[0] ?? 'day'),
+            risk: scoreRisk(f, get('risk')[0] ?? 'moderate'),
+            assets: scoreAssets(f, get('assets')[0] ?? 'anything'),
+            rules: scoreRules(f, get('rules')),
+          };
+          let total = 0;
+          let weightSum = 0;
+          (Object.keys(subs) as Question['key'][]).forEach((k) => {
+            total += subs[k].s * WEIGHTS[k];
+            weightSum += WEIGHTS[k];
+          });
+          const base = total / weightSum;
+          const pct = Math.min(99, Math.round(100 * base ** 0.8));
+
+          const reasons = (Object.keys(subs) as Question['key'][])
+            .map((k) => ({ s: subs[k].s, why: subs[k].why }))
+            .filter((r): r is { s: number; why: string } => r.why !== null && r.s >= 0.55)
+            .sort((a, b) => b.s - a.s)
+            .slice(0, 3)
+            .map((r) => r.why);
+
+          return { firm: f, pct, reasons };
+        })
+        .sort((a, b) => b.pct - a.pct || b.firm.rating - a.firm.rating)
+        .slice(0, 5);
+    }
+
+    function renderResults(): void {
+      const top = runScoring();
+      resultsList.innerHTML = top
+        .map(
+          (r, i) => `
+        <li class="panel result-card rise" style="--d:${0.08 * i}s">
+          <div class="result-main">
+            <div class="result-rank-head">
+              <span class="mono result-rank">#${i + 1}</span>
+              <span class="logo-badge" aria-hidden="true">${r.firm.logoInitials}</span>
+              <div class="result-name-block">
+                <h3>${r.firm.name}</h3>
+                <span class="mono result-sub">${r.firm.country} · ${r.firm.rating}/5 · ${r.firm.vertical}</span>
+              </div>
+            </div>
+            <div class="match-meter">
+              <div class="match-bar">
+                <span class="match-fill" style="width:${r.pct}%"></span>
+              </div>
+              <span class="mono match-pct">${r.pct}% match</span>
+            </div>
+            ${
+              r.reasons.length
+                ? `<ul class="reasons">${r.reasons.map((w) => `<li>${w}</li>`).join('')}</ul>`
+                : '<ul class="reasons"><li>Solid all-round fit across your answers</li></ul>'
+            }
+          </div>
+          <a class="btn btn-primary result-cta" href="/prop-firms/${r.firm.slug}/">
+            View profile →
+          </a>
+        </li>`,
+        )
+        .join('');
+
+      quizCard.classList.add('hidden');
+      resultsBox.classList.remove('hidden');
+      resultsBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    nextBtn.addEventListener('click', () => {
+      if (step === QUESTIONS.length - 1) {
+        renderResults();
+        return;
+      }
+      step += 1;
+      renderQuestion();
+    });
+
+    backBtn.addEventListener('click', () => {
+      if (step > 0) {
+        step -= 1;
+        renderQuestion();
+      }
+    });
+
+    document.getElementById('btn-restart')?.addEventListener('click', () => {
+      step = 0;
+      for (const k of Object.keys(answers)) delete answers[k];
+      resultsBox.classList.add('hidden');
+      quizCard.classList.remove('hidden');
+      renderQuestion();
+    });
+
+    renderQuestion();
+  </script>
+
+  <style>
+    .quiz-hero {
+      padding: clamp(56px, 8vw, 100px) 0 clamp(32px, 4vw, 48px);
+      border-bottom: 1px solid var(--line);
+    }
+    .quiz-hero h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); }
+    .quiz-sub { margin-top: 14px; color: var(--muted); max-width: 56ch; }
+
+    .quiz-section { padding-top: 40px; }
+    .quiz-shell { max-width: 860px; }
+
+    .quiz-card { padding: clamp(22px, 4vw, 36px); display: grid; gap: 24px; }
+    .quiz-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .quiz-progress-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+      flex: none;
+    }
+    .progress-track {
+      flex: 1;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(27, 42, 49, 0.7);
+      overflow: hidden;
+    }
+    .progress-fill {
+      display: block;
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+      transition: width 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    .quiz-back {
+      appearance: none;
+      background: none;
+      border: none;
+      color: var(--faint);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      flex: none;
+      transition: color 0.15s ease;
+    }
+    .quiz-back:hover { color: var(--accent); }
+
+    .q-kicker {
+      font-size: 0.66rem;
+      letter-spacing: 0.18em;
+      color: var(--faint);
+      margin-bottom: 10px;
+    }
+    .q-title { font-size: clamp(1.25rem, 2.6vw, 1.7rem); margin-bottom: 6px; }
+    .q-sub { color: var(--muted); font-size: 0.95rem; }
+
+    .q-options {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+    .q-opt {
+      appearance: none;
+      background: rgba(27, 42, 49, 0.25);
+      border: 1px solid var(--line-bright);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 16px 18px;
+      display: grid;
+      gap: 5px;
+      justify-items: start;
+      cursor: pointer;
+      text-align: left;
+      font-family: var(--font-body);
+      transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+    }
+    .q-opt:hover { border-color: var(--accent-dim); transform: translateY(-2px); }
+    .q-opt.is-selected {
+      border-color: var(--accent);
+      background: rgba(182, 240, 74, 0.08);
+      box-shadow: 0 0 0 3px rgba(182, 240, 74, 0.1);
+    }
+    .q-opt-label { font-weight: 600; font-size: 0.95rem; }
+    .q-opt-hint { font-size: 0.66rem; letter-spacing: 0.08em; color: var(--faint); }
+    .q-opt.is-selected .q-opt-hint { color: var(--accent-dim); }
+
+    .quiz-actions { display: flex; justify-content: flex-end; }
+    #btn-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* results */
+    .results-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 26px;
+    }
+    .results-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 18px;
+    }
+    .result-card {
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      flex-wrap: wrap;
+    }
+    .result-main { flex: 1; min-width: 280px; display: grid; gap: 14px; }
+    .result-rank-head { display: flex; align-items: center; gap: 14px; }
+    .result-rank { font-size: 0.8rem; color: var(--faint); letter-spacing: 0.1em; }
+    .result-name-block { display: grid; gap: 2px; }
+    .result-name-block h3 { font-size: 1.1rem; }
+    .result-sub { font-size: 0.7rem; color: var(--faint); letter-spacing: 0.06em; }
+
+    .match-meter { display: flex; align-items: center; gap: 14px; }
+    .match-bar {
+      flex: 1;
+      max-width: 340px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(27, 42, 49, 0.7);
+      overflow: hidden;
+    }
+    .match-fill {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+      box-shadow: 0 0 14px rgba(182, 240, 74, 0.5);
+    }
+    .match-pct {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .reasons {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 5px;
+    }
+    .reasons li {
+      color: var(--muted);
+      font-size: 0.88rem;
+      padding-left: 18px;
+      position: relative;
+    }
+    .reasons li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+    }
+    .result-cta { flex: none; }
+
+    .results-note {
+      margin-top: 22px;
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      color: var(--faint);
+    }
+  </style>
+</BaseLayout>

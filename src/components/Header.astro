@@ -1,0 +1,168 @@
+---
+const nav = [
+  { label: 'Home', href: '/' },
+  { label: 'All Prop Firms', href: '/prop-firms/' },
+  { label: 'Challenges', href: '/prop-firm-challenges' },
+  { label: 'Compare', href: '/compare-firms/' },
+  { label: 'Match Quiz', href: '/match' },
+  { label: 'Offers', href: '/offers' },
+  { label: 'Futures', href: '/futures' },
+];
+
+const verticalTabs = [
+  { label: 'Forex', href: '/prop-firms/?vertical=cfd' },
+  { label: 'Futures', href: '/prop-firms/?vertical=futures' },
+  { label: 'Crypto', href: '/prop-firms/?vertical=crypto' },
+];
+
+const path = Astro.url.pathname;
+---
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a href="/" class="brand" aria-label="PropFirm Match Clone — home">
+      <span class="brand-mark" aria-hidden="true">PM</span>
+      <span class="brand-name">
+        PropFirm<span class="accent-text"> Match</span>
+        <small>clone</small>
+      </span>
+    </a>
+
+    <nav class="main-nav" aria-label="Primary">
+      {nav.map((item) => {
+        const active =
+          item.href === '/' ? path === '/' : path.startsWith(item.href);
+        return (
+          <a href={item.href} class:list={[{ active }]}>
+            {item.label}
+          </a>
+        );
+      })}
+    </nav>
+  </div>
+
+  <div class="wrap vertical-tabs-row">
+    <div class="vertical-tabs" role="tablist" aria-label="Trading verticals">
+      {verticalTabs.map((tab) => (
+        <a class="vtab" href={tab.href}>{tab.label}</a>
+      ))}
+      <span class="vtab-hint mono">// pick your market</span>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(7, 11, 13, 0.82);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding-block: 14px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: none;
+  }
+  .brand-mark {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--accent-ink);
+    background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+    box-shadow: 0 6px 18px -8px rgba(182, 240, 74, 0.6);
+  }
+  .brand-name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: -0.01em;
+  }
+  .brand-name small {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--faint);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-left: 6px;
+  }
+
+  .main-nav {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .main-nav a {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+  .main-nav a:hover {
+    color: var(--text);
+    background: rgba(27, 42, 49, 0.5);
+  }
+  .main-nav a.active {
+    color: var(--accent);
+    background: rgba(182, 240, 74, 0.08);
+  }
+
+  .vertical-tabs-row {
+    border-top: 1px solid var(--line);
+  }
+  .vertical-tabs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-block: 8px;
+    overflow-x: auto;
+  }
+  .vtab {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--line-bright);
+    border-radius: 999px;
+    padding: 5px 14px;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+  }
+  .vtab:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(182, 240, 74, 0.1);
+  }
+  .vtab-hint {
+    font-size: 0.66rem;
+    color: var(--faint);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 900px) {
+    .main-nav { display: none; }
+    .header-inner { padding-block: 12px; }
+  }
+</style>

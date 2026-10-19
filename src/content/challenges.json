@@ -1,0 +1,551 @@
+[
+  {
+    "accountSize": 15000,
+    "dailyLossPct": 5,
+    "drawdownType": "balance-based",
+    "firm": "ftmo",
+    "id": "ftmo-15k-2step",
+    "maxLossPct": 10,
+    "payoutFrequency": "Every 14 days",
+    "price": 245,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      10,
+      5
+    ],
+    "steps": 2
+  },
+  {
+    "accountSize": 25000,
+    "dailyLossPct": 5,
+    "drawdownType": "balance-based",
+    "firm": "ftmo",
+    "id": "ftmo-25k-2step",
+    "maxLossPct": 10,
+    "payoutFrequency": "Every 14 days",
+    "price": 250,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      10,
+      5
+    ],
+    "steps": 2
+  },
+  {
+    "accountSize": 50000,
+    "dailyLossPct": 5,
+    "drawdownType": "balance-based",
+    "firm": "ftmo",
+    "id": "ftmo-50k-2step",
+    "maxLossPct": 10,
+    "payoutFrequency": "Every 14 days",
+    "price": 345,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      10,
+      5
+    ],
+    "steps": 2
+  },
+  {
+    "accountSize": 100000,
+    "dailyLossPct": 5,
+    "discountedPrice": 439,
+    "drawdownType": "balance-based",
+    "firm": "ftmo",
+    "id": "ftmo-100k-2step",
+    "maxLossPct": 10,
+    "payoutFrequency": "Every 14 days",
+    "price": 540,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      10,
+      5
+    ],
+    "steps": 2
+  },
+  {
+    "accountSize": 200000,
+    "dailyLossPct": 5,
+    "drawdownType": "balance-based",
+    "firm": "ftmo",
+    "id": "ftmo-200k-2step",
+    "maxLossPct": 10,
+    "payoutFrequency": "Every 14 days",
+    "price": 1080,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      10,
+      5
+    ],
+    "steps": 2
+  },
+  {
+    "accountSize": 6000,
+    "dailyLossPct": 5,
+    "drawdownType": "static",
+    "firm": "fundednext",
+    "id": "fundednext-6k-2step",
+    "maxLossPct": 10,
+    "payoutFrequency": "Every 14 days",
+    "price": 59.99,
+    "profitSplitPct": 90,
+    "profitTargets": [
+      8,
+      5
+    ],
+    "steps": 2
+  },
+  {
+    "accountSize": 25000,
+    "dailyLossPct": 5,
+    "drawdownType": "static",
+    "firm": "fundednext",
+    "id": "fundednext-25k-2step",
+    "maxLossPct": 10,
+    "payoutFrequency": "Every 14 days",
+    "price": 199.99,
+    "profitSplitPct": 90,
+    "profitTargets": [
+      8,
+      5
+    ],
+    "steps": 2
+  },
+  {
+    "accountSize": 100000,
+    "dailyLossPct": 5,
+    "discountedPrice": 466.65,
+    "drawdownType": "static",
+    "firm": "fundednext",
+    "id": "fundednext-100k-2step",
+    "maxLossPct": 10,
+    "payoutFrequency": "Every 14 days",
+    "price": 549.99,
+    "profitSplitPct": 90,
+    "profitTargets": [
+      8,
+      5
+    ],
+    "steps": 2
+  },
+  {
+    "accountSize": 100000,
+    "dailyLossPct": 3,
+    "drawdownType": "static",
+    "firm": "fundednext",
+    "id": "fundednext-100k-1step",
+    "maxLossPct": 6,
+    "payoutFrequency": "Every 14 days",
+    "price": 569.99,
+    "profitSplitPct": 90,
+    "profitTargets": [
+      10
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 50000,
+    "dailyLossPct": 5,
+    "discountedPrice": 255.55,
+    "drawdownType": "balance-based",
+    "firm": "fundingpips",
+    "id": "fundingpips-50k-2step",
+    "maxLossPct": 10,
+    "payoutFrequency": "On demand (5-day cycle)",
+    "price": 269,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      10,
+      5
+    ],
+    "steps": 2
+  },
+  {
+    "accountSize": 100000,
+    "dailyLossPct": 3,
+    "discountedPrice": 527.25,
+    "drawdownType": "balance-based",
+    "firm": "fundingpips",
+    "id": "fundingpips-100k-1step",
+    "maxLossPct": 6,
+    "payoutFrequency": "On demand (5-day cycle)",
+    "price": 555,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      10
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 25000,
+    "dailyLossPct": 5,
+    "drawdownType": "static",
+    "firm": "the5ers",
+    "id": "the5ers-25k-2step",
+    "maxLossPct": 10,
+    "payoutFrequency": "Every 14 days",
+    "price": 176,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      10,
+      5
+    ],
+    "steps": 2
+  },
+  {
+    "accountSize": 100000,
+    "dailyLossPct": 5,
+    "drawdownType": "static",
+    "firm": "the5ers",
+    "id": "the5ers-100k-2step",
+    "maxLossPct": 10,
+    "payoutFrequency": "Every 14 days",
+    "price": 491,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      10,
+      5
+    ],
+    "steps": 2
+  },
+  {
+    "accountSize": 50000,
+    "dailyLossPct": 4,
+    "drawdownType": "static",
+    "firm": "e8-markets",
+    "id": "e8-markets-50k-1step",
+    "maxLossPct": 8,
+    "payoutFrequency": "Every 7 days",
+    "price": 130,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      6
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 150000,
+    "dailyLossPct": 4,
+    "drawdownType": "static",
+    "firm": "e8-markets",
+    "id": "e8-markets-150k-1step",
+    "maxLossPct": 8,
+    "payoutFrequency": "Every 7 days",
+    "price": 385,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      6
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 50000,
+    "dailyLossPct": 4,
+    "drawdownType": "intraday-trailing",
+    "firm": "topstep",
+    "id": "topstep-50k-1step",
+    "maxLossPct": 4,
+    "payoutFrequency": "After 5 winning days (min $200)",
+    "price": 49,
+    "profitSplitPct": 90,
+    "profitTargets": [
+      6
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 100000,
+    "dailyLossPct": 3,
+    "drawdownType": "intraday-trailing",
+    "firm": "topstep",
+    "id": "topstep-100k-1step",
+    "maxLossPct": 3,
+    "payoutFrequency": "After 5 winning days (min $200)",
+    "price": 99,
+    "profitSplitPct": 90,
+    "profitTargets": [
+      6
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 150000,
+    "dailyLossPct": 3,
+    "drawdownType": "intraday-trailing",
+    "firm": "topstep",
+    "id": "topstep-150k-1step",
+    "maxLossPct": 3.33,
+    "payoutFrequency": "After 5 winning days (min $200)",
+    "price": 149,
+    "profitSplitPct": 90,
+    "profitTargets": [
+      6
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 50000,
+    "dailyLossPct": 5,
+    "drawdownType": "static",
+    "firm": "alpha-capital-group",
+    "id": "alpha-capital-group-50k-2step",
+    "maxLossPct": 10,
+    "payoutFrequency": "Every 14 days",
+    "price": 275,
+    "profitSplitPct": 90,
+    "profitTargets": [
+      8,
+      5
+    ],
+    "steps": 2
+  },
+  {
+    "accountSize": 100000,
+    "dailyLossPct": 5,
+    "drawdownType": "static",
+    "firm": "alpha-capital-group",
+    "id": "alpha-capital-group-100k-2step",
+    "maxLossPct": 10,
+    "payoutFrequency": "Every 14 days",
+    "price": 499,
+    "profitSplitPct": 90,
+    "profitTargets": [
+      8,
+      5
+    ],
+    "steps": 2
+  },
+  {
+    "accountSize": 50000,
+    "dailyLossPct": 3,
+    "discountedPrice": 245.64,
+    "drawdownType": "eod-trailing",
+    "firm": "blue-guardian",
+    "id": "blue-guardian-50k-2step",
+    "maxLossPct": 6,
+    "payoutFrequency": "Every 7 days",
+    "price": 267,
+    "profitSplitPct": 90,
+    "profitTargets": [
+      9,
+      5
+    ],
+    "steps": 2
+  },
+  {
+    "accountSize": 100000,
+    "dailyLossPct": 3,
+    "discountedPrice": 457.24,
+    "drawdownType": "eod-trailing",
+    "firm": "blue-guardian",
+    "id": "blue-guardian-100k-2step",
+    "maxLossPct": 6,
+    "payoutFrequency": "Every 7 days",
+    "price": 497,
+    "profitSplitPct": 90,
+    "profitTargets": [
+      9,
+      5
+    ],
+    "steps": 2
+  },
+  {
+    "accountSize": 50000,
+    "dailyLossPct": 0,
+    "discountedPrice": 33.6,
+    "drawdownType": "intraday-trailing",
+    "firm": "apex-trader-funding",
+    "id": "apex-trader-funding-50k-1step",
+    "maxLossPct": 5,
+    "payoutFrequency": "Twice monthly",
+    "price": 168,
+    "profitSplitPct": 90,
+    "profitTargets": [
+      6
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 100000,
+    "dailyLossPct": 0,
+    "discountedPrice": 57.6,
+    "drawdownType": "intraday-trailing",
+    "firm": "apex-trader-funding",
+    "id": "apex-trader-funding-100k-1step",
+    "maxLossPct": 3,
+    "payoutFrequency": "Twice monthly",
+    "price": 288,
+    "profitSplitPct": 90,
+    "profitTargets": [
+      6
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 300000,
+    "dailyLossPct": 0,
+    "discountedPrice": 97.6,
+    "drawdownType": "intraday-trailing",
+    "firm": "apex-trader-funding",
+    "id": "apex-trader-funding-300k-1step",
+    "maxLossPct": 2.2,
+    "payoutFrequency": "Twice monthly",
+    "price": 488,
+    "profitSplitPct": 90,
+    "profitTargets": [
+      6
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 25000,
+    "dailyLossPct": 4,
+    "drawdownType": "static",
+    "firm": "funded-trading-plus",
+    "id": "funded-trading-plus-25k-1step",
+    "maxLossPct": 8,
+    "payoutFrequency": "Every 7 days",
+    "price": 249,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      8
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 100000,
+    "dailyLossPct": 4,
+    "drawdownType": "static",
+    "firm": "funded-trading-plus",
+    "id": "funded-trading-plus-100k-1step",
+    "maxLossPct": 8,
+    "payoutFrequency": "Every 7 days",
+    "price": 899,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      8
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 5000,
+    "dailyLossPct": 5,
+    "drawdownType": "static",
+    "firm": "maven-trading",
+    "id": "maven-trading-5k-1step",
+    "maxLossPct": 8,
+    "payoutFrequency": "Every 7 days",
+    "price": 30,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      8
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 25000,
+    "dailyLossPct": 5,
+    "drawdownType": "static",
+    "firm": "maven-trading",
+    "id": "maven-trading-25k-1step",
+    "maxLossPct": 8,
+    "payoutFrequency": "Every 7 days",
+    "price": 119,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      8
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 50000,
+    "dailyLossPct": 2.5,
+    "drawdownType": "intraday-trailing",
+    "firm": "my-funded-futures",
+    "id": "my-funded-futures-50k-1step",
+    "maxLossPct": 5,
+    "payoutFrequency": "Twice monthly",
+    "price": 130,
+    "profitSplitPct": 90,
+    "profitTargets": [
+      6
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 100000,
+    "dailyLossPct": 2.5,
+    "drawdownType": "intraday-trailing",
+    "firm": "my-funded-futures",
+    "id": "my-funded-futures-100k-1step",
+    "maxLossPct": 5,
+    "payoutFrequency": "Twice monthly",
+    "price": 200,
+    "profitSplitPct": 90,
+    "profitTargets": [
+      6
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 50000,
+    "dailyLossPct": 2.5,
+    "drawdownType": "eod-trailing",
+    "firm": "lucid-trading",
+    "id": "lucid-trading-50k-1step",
+    "maxLossPct": 5,
+    "payoutFrequency": "On demand (after 5 winning days)",
+    "price": 129,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      6
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 100000,
+    "dailyLossPct": 2.5,
+    "drawdownType": "eod-trailing",
+    "firm": "lucid-trading",
+    "id": "lucid-trading-100k-1step",
+    "maxLossPct": 5,
+    "payoutFrequency": "On demand (after 5 winning days)",
+    "price": 199,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      6
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 50000,
+    "dailyLossPct": 2.5,
+    "drawdownType": "eod-trailing",
+    "firm": "tradeify",
+    "id": "tradeify-50k-1step",
+    "maxLossPct": 5,
+    "payoutFrequency": "Every 7 days",
+    "price": 149,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      6
+    ],
+    "steps": 1
+  },
+  {
+    "accountSize": 100000,
+    "dailyLossPct": 2.5,
+    "drawdownType": "eod-trailing",
+    "firm": "tradeify",
+    "id": "tradeify-100k-1step",
+    "maxLossPct": 5,
+    "payoutFrequency": "Every 7 days",
+    "price": 249,
+    "profitSplitPct": 80,
+    "profitTargets": [
+      6
+    ],
+    "steps": 1
+  }
+]

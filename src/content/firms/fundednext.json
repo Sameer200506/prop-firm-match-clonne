@@ -1,0 +1,58 @@
+{
+  "assets": [
+    "fx",
+    "metals",
+    "indices",
+    "crypto"
+  ],
+  "country": "United Arab Emirates",
+  "discount": {
+    "code": "FN15",
+    "percentOff": 15
+  },
+  "estimated": false,
+  "founded": 2022,
+  "lastUpdated": "2026-08-25",
+  "leverage": {
+    "crypto": "1:2",
+    "fx": "1:100",
+    "indices": "1:20",
+    "metals": "1:25"
+  },
+  "logoInitials": "FN",
+  "maxAllocation": 200000,
+  "name": "FundedNext",
+  "payoutMethods": [
+    "Bank transfer",
+    "PayPal",
+    "Crypto",
+    "Rise"
+  ],
+  "platforms": [
+    "MT4",
+    "MT5",
+    "cTrader"
+  ],
+  "rating": 4.7,
+  "restrictedCountries": [
+    "United States",
+    "Iran",
+    "North Korea"
+  ],
+  "reviewCount": 2187,
+  "rules": {
+    "eas": true,
+    "newsTrading": true,
+    "overnight": true,
+    "swapFree": true
+  },
+  "scalingCap": 4000000,
+  "scrape": {
+    "lastAttempt": "2026-08-25T11:24:06.596Z",
+    "status": "updated"
+  },
+  "slug": "fundednext",
+  "summary": "Fast-growing multi-program firm offering 1-step, 2-step and instant funding routes with profit splits up to 95% and 100% first-payout share on select programs.",
+  "vertical": "cfd",
+  "website": "https://fundednext.com"
+}

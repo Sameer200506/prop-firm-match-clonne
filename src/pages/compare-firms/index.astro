@@ -1,0 +1,205 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatUsdShort } from '../../utils/format';
+
+const firms = await getCollection('firms');
+const challenges = await getCollection('challenges');
+
+// Only firms with tracked challenges are comparable head-to-head.
+const challengeSlugs = new Set(challenges.map((c) => c.data.firm));
+const comparable = firms
+  .filter((f) => challengeSlugs.has(f.data.slug))
+  .sort((a, b) => b.data.rating - a.data.rating)
+  .map((f) => f.data);
+
+// Canonical pair slug = alphabetical order (must match getStaticPaths).
+function pairSlug(a: string, b: string): string {
+  return [a, b].sort().join('-vs-');
+}
+
+const featured = [
+  ['ftmo', 'fundednext'],
+  ['ftmo', 'the5ers'],
+  ['topstep', 'apex-trader-funding'],
+  ['fundingpips', 'e8-markets'],
+] as const;
+
+const firmBySlug = new Map(firms.map((f) => [f.data.slug, f.data]));
+---
+
+<BaseLayout
+  title="Compare Prop Firms Head-to-Head"
+  description="Pick any two prop trading firms and compare them side by side: ratings, fees, profit splits, drawdown rules, platforms and leverage — with a clear winner per metric."
+>
+  <section class="cmp-hero glow-field">
+    <div class="wrap">
+      <p class="kicker rise">Head-to-head</p>
+      <h1 class="rise" style="--d:0.06s">
+        Compare firms,<br /><span class="accent-text">pick a winner</span>
+      </h1>
+      <p class="cmp-sub rise" style="--d:0.12s">
+        Choose two firms below. We line up ratings, fees, splits and drawdown
+        rules side by side and highlight the stronger value on every row.
+      </p>
+
+      <!-- PICKER -->
+      <form class="panel picker rise" style="--d:0.18s" id="picker-form">
+        <div class="picker-field">
+          <label for="picker-a">Firm A</label>
+          <select id="picker-a" required>
+            <option value="" disabled selected>Select firm…</option>
+            {comparable.map((f) => (<option value={f.slug}>{f.name}</option>))}
+          </select>
+        </div>
+        <span class="picker-vs mono" aria-hidden="true">VS</span>
+        <div class="picker-field">
+          <label for="picker-b">Firm B</label>
+          <select id="picker-b" required>
+            <option value="" disabled selected>Select firm…</option>
+            {comparable.map((f) => (<option value={f.slug}>{f.name}</option>))}
+          </select>
+        </div>
+        <button class="btn btn-primary picker-go" type="submit">Compare →</button>
+        <p class="mono picker-error hidden" id="picker-error">
+          // pick two different firms to compare
+        </p>
+      </form>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Popular matchups</p>
+          <h2>Featured comparisons</h2>
+        </div>
+      </div>
+
+      <div class="featured-grid">
+        {featured.map(([a, b], i) => {
+          const fa = firmBySlug.get(a);
+          const fb = firmBySlug.get(b);
+          if (!fa || !fb) return null;
+          return (
+            <a
+              class="panel featured-card rise"
+              style={`--d:${0.05 * i}s`}
+              href={`/compare-firms/${pairSlug(a, b)}/`}
+            >
+              <div class="feat-names">
+                <span class="feat-name">{fa.name}</span>
+                <span class="mono feat-vs">vs</span>
+                <span class="feat-name">{fb.name}</span>
+              </div>
+              <p class="mono feat-meta">
+                {fa.rating} ★ · {formatUsdShort(fa.maxAllocation)}
+                <span class="feat-sep">//</span>
+                {fb.rating} ★ · {formatUsdShort(fb.maxAllocation)}
+              </p>
+              <span class="mono feat-go">run comparison →</span>
+            </a>
+          );
+        })}
+      </div>
+
+      <p class="mono cmp-note">
+        {comparable.length} firms with tracked challenge data can be compared —
+        every unordered pair has its own page.
+      </p>
+    </div>
+  </section>
+
+  <script>
+    const form = document.getElementById('picker-form') as HTMLFormElement | null;
+    if (form) {
+      const a = document.getElementById('picker-a') as HTMLSelectElement;
+      const b = document.getElementById('picker-b') as HTMLSelectElement;
+      const err = document.getElementById('picker-error');
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!a.value || !b.value || a.value === b.value) {
+          err?.classList.remove('hidden');
+          return;
+        }
+        const slug = [a.value, b.value].sort().join('-vs-');
+        window.location.href = `/compare-firms/${slug}/`;
+      });
+    }
+  </script>
+
+  <style>
+    .cmp-hero {
+      padding: clamp(56px, 8vw, 100px) 0 clamp(36px, 5vw, 56px);
+      border-bottom: 1px solid var(--line);
+    }
+    .cmp-hero h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); }
+    .cmp-sub { margin-top: 14px; color: var(--muted); max-width: 56ch; }
+
+    .picker {
+      margin-top: 30px;
+      padding: 22px;
+      display: flex;
+      align-items: end;
+      gap: 18px;
+      flex-wrap: wrap;
+      max-width: 860px;
+    }
+    .picker-field { display: grid; gap: 0.35em; flex: 1; min-width: 200px; }
+    .picker-vs {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+      padding-bottom: 0.7em;
+    }
+    .picker-go { flex: none; }
+    .picker-error {
+      width: 100%;
+      margin: 0;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      color: var(--loss);
+    }
+
+    .featured-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+    }
+    .featured-card {
+      padding: 22px;
+      display: grid;
+      gap: 12px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .featured-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+    }
+    .feat-names {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.98rem;
+    }
+    .feat-vs { color: var(--accent); font-size: 0.72rem; letter-spacing: 0.14em; }
+    .feat-meta { font-size: 0.74rem; color: var(--muted); }
+    .feat-sep { color: var(--faint); margin-inline: 8px; }
+    .feat-go {
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+    }
+    .cmp-note {
+      margin-top: 26px;
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      color: var(--faint);
+    }
+  </style>
+</BaseLayout>

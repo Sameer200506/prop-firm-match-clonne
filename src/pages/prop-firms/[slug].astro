@@ -1,0 +1,625 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import StarRating from '../../components/StarRating.astro';
+import DiscountBadge from '../../components/DiscountBadge.astro';
+import ChallengeTable from '../../components/ChallengeTable.astro';
+import { formatUsdShort, verticalLabel, yearsActive } from '../../utils/format';
+
+export async function getStaticPaths() {
+  const firms = await getCollection('firms');
+  const challenges = await getCollection('challenges');
+  const offers = await getCollection('offers');
+  const reviews = await getCollection('reviews');
+
+  return firms.map((firm) => {
+    const slug = firm.data.slug;
+    return {
+      params: { slug },
+      props: {
+        firm: firm.data,
+        challenges: challenges
+          .filter((c) => c.data.firm === slug)
+          .map((c) => c.data),
+        offers: offers.filter((o) => o.data.firm === slug).map((o) => o.data),
+        reviews: reviews
+          .filter((r) => r.data.firm === slug)
+          .map((r) => r.data),
+      },
+    };
+  });
+}
+
+const { firm, challenges, offers, reviews } = Astro.props;
+
+const ruleLabels: Record<string, string> = {
+  newsTrading: 'News trading',
+  eas: 'EAs / algos',
+  overnight: 'Overnight & weekend',
+  swapFree: 'Swap-free',
+};
+
+function ruleStatus(value: boolean | 'restricted'): { label: string; tone: string } {
+  if (value === true) return { label: 'Allowed', tone: 'ok' };
+  if (value === false) return { label: 'Forbidden', tone: 'no' };
+  return { label: 'Restricted', tone: 'warn' };
+}
+
+const rules = [
+  { key: 'newsTrading', value: firm.rules.newsTrading },
+  { key: 'eas', value: firm.rules.eas },
+  { key: 'overnight', value: firm.rules.overnight },
+  { key: 'swapFree', value: firm.rules.swapFree },
+] as const;
+
+// 5-to-1 star histogram from the seeded reviews.
+const histogram = [5, 4, 3, 2, 1].map((star) => ({
+  star,
+  count: reviews.filter((r) => Math.round(r.rating) === star).length,
+}));
+const maxBucket = Math.max(1, ...histogram.map((h) => h.count));
+
+const sortedReviews = [...reviews].sort((a, b) => b.date.localeCompare(a.date));
+const leverageEntries = Object.entries(firm.leverage);
+---
+
+<BaseLayout
+  title={`${firm.name} Review — Rules, Challenges & Discounts`}
+  description={`${firm.name} (${firm.country}, est. ${firm.founded}): ${firm.rating}/5 rating, ${firm.reviewCount.toLocaleString('en-US')} reviews. Challenge fees, profit splits, drawdown rules, platforms and active promo codes.`}
+>
+  <section class="fp-hero glow-field">
+    <div class="wrap">
+      <nav class="crumbs mono rise" aria-label="Breadcrumb">
+        <a href="/">Home</a> <span>/</span>
+        <a href="/prop-firms/">Prop firms</a> <span>/</span>
+        <span class="crumb-cur">{firm.name}</span>
+      </nav>
+
+      <div class="fp-head rise" style="--d:0.06s">
+        <span class="logo-badge xl" aria-hidden="true">{firm.logoInitials}</span>
+        <div class="fp-title">
+          <h1>{firm.name}</h1>
+          <div class="fp-tags">
+            <span class={`tag tag-${firm.vertical}`}>{verticalLabel[firm.vertical]}</span>
+            <span class="tag">{firm.country}</span>
+            <span class="tag">est. {firm.founded} · {yearsActive(firm.founded)} yrs</span>
+            {firm.estimated && <span class="tag tag-est">≈ estimated data</span>}
+          </div>
+        </div>
+        <div class="fp-rating">
+          <StarRating rating={firm.rating} />
+          <span class="mono fp-rcount">{firm.reviewCount.toLocaleString('en-US')} reviews</span>
+        </div>
+      </div>
+
+      <p class="fp-summary rise" style="--d:0.12s">{firm.summary}</p>
+
+      <div class="fp-actions rise" style="--d:0.18s">
+        {firm.discount && (
+          <DiscountBadge code={firm.discount.code} percentOff={firm.discount.percentOff} />
+        )}
+        <a class="btn btn-primary" href={firm.website} rel="nofollow noopener" target="_blank">
+          Visit {firm.name} <span aria-hidden="true">↗</span>
+        </a>
+        <a class="btn btn-ghost" href="/compare-firms/">Compare this firm</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB NAV -->
+  <div class="wrap fp-tabbar-wrap rise" style="--d:0.24s">
+    <nav class="fp-tabbar" aria-label="Firm sections">
+      <button class="fp-tab is-active" data-tab="overview" type="button">Overview</button>
+      <button class="fp-tab" data-tab="challenges" type="button">
+        Challenges <span class="mono tab-count">{challenges.length}</span>
+      </button>
+      <button class="fp-tab" data-tab="reviews" type="button">
+        Reviews <span class="mono tab-count">{reviews.length}</span>
+      </button>
+      <button class="fp-tab" data-tab="offers" type="button">
+        Offers <span class="mono tab-count">{offers.length}</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- OVERVIEW -->
+  <section class="fp-panel is-visible" data-panel="overview">
+    <div class="wrap fp-grid">
+      <div class="fp-main">
+        <div class="panel block">
+          <p class="kicker">Snapshot</p>
+          <h2>At a glance</h2>
+          <dl class="glance">
+            <div><dt>Country</dt><dd>{firm.country}</dd></div>
+            <div><dt>Founded</dt><dd class="mono">{firm.founded}</dd></div>
+            <div><dt>Rating</dt><dd class="mono accent-text">{firm.rating} / 5</dd></div>
+            <div><dt>Max allocation</dt><dd class="mono">{formatUsdShort(firm.maxAllocation)}</dd></div>
+            <div>
+              <dt>Scaling cap</dt>
+              <dd class="mono">{firm.scalingCap ? formatUsdShort(firm.scalingCap) : '—'}</dd>
+            </div>
+            <div><dt>Payout methods</dt><dd>{firm.payoutMethods.join(', ') || '—'}</dd></div>
+          </dl>
+        </div>
+
+        <div class="panel block">
+          <p class="kicker">Markets</p>
+          <h2>Platforms &amp; leverage</h2>
+          <div class="platform-row">
+            {firm.platforms.map((p) => (<span class="tag plat">{p}</span>))}
+          </div>
+          {leverageEntries.length > 0 && (
+            <div class="table-scroll lev-matrix">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    {leverageEntries.map(([asset]) => (
+                      <th scope="col">{asset}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    {leverageEntries.map(([, lev]) => (
+                      <td class="mono">{lev}</td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
+          <p class="assets-line mono">
+            assets: {firm.assets.join(' · ') || 'n/a'}
+          </p>
+        </div>
+
+        <div class="panel block">
+          <p class="kicker">Rulebook</p>
+          <h2>Trading rules</h2>
+          <ul class="rule-grid">
+            {rules.map((r) => {
+              const s = ruleStatus(r.value);
+              return (
+                <li class={`rule ${s.tone}`}>
+                  <span class="rule-name">{ruleLabels[r.key]}</span>
+                  <span class="mono rule-state">
+                    {s.tone === 'ok' ? '✓' : s.tone === 'no' ? '✕' : '!'} {s.label}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+          {firm.restrictedCountries.length > 0 && (
+            <p class="restricted mono">
+              <span class="restricted-label">Restricted:</span>
+              {firm.restrictedCountries.join(', ')}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <aside class="fp-side">
+        <div class="panel block side-block">
+          <p class="kicker">Data freshness</p>
+          <p class="side-note">
+            Figures last verified <span class="mono accent-text">{firm.lastUpdated}</span>.
+            Prop-firm terms change often — confirm current rules on the firm's
+            own site before buying.
+          </p>
+          <a class="btn btn-ghost side-cta" href={firm.website} rel="nofollow noopener" target="_blank">
+            {firm.website.replace(/^https?:\/\//, '')} <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <div class="panel block side-block">
+          <p class="kicker">Jump to</p>
+          <ul class="jump">
+            <li><button type="button" data-jump="challenges">Challenge pricing</button></li>
+            <li><button type="button" data-jump="reviews">Trader reviews</button></li>
+            <li><button type="button" data-jump="offers">Active offers</button></li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- CHALLENGES -->
+  <section class="fp-panel" data-panel="challenges" hidden>
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Pricing</p>
+          <h2>{firm.name} challenges</h2>
+        </div>
+        <p class="muted mono head-note">{challenges.length} programs tracked</p>
+      </div>
+
+      {challenges.length > 0 ? (
+        <ChallengeTable challenges={challenges} caption={`${firm.name} — challenge matrix`} />
+      ) : (
+        <div class="panel empty-state">
+          <p class="mono empty-code">// no challenge data yet</p>
+          <p>
+            We haven't ingested structured pricing for {firm.name}. Check the
+            firm's site directly, or browse
+            <a class="inline-link" href="/prop-firm-challenges">all tracked challenges</a>.
+          </p>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section class="fp-panel" data-panel="reviews" hidden>
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Community</p>
+          <h2>Trader reviews</h2>
+        </div>
+      </div>
+
+      {reviews.length > 0 ? (
+        <div class="reviews-grid">
+          <div class="panel histogram-card">
+            <p class="hist-score mono">{firm.rating.toFixed(1)}</p>
+            <StarRating rating={firm.rating} showValue={false} />
+            <div class="hist-bars">
+              {histogram.map((h) => (
+                <div class="hist-row">
+                  <span class="mono hist-label">{h.star}★</span>
+                  <span class="hist-track">
+                    <span
+                      class="hist-fill"
+                      style={`width: ${(h.count / maxBucket) * 100}%`}
+                    ></span>
+                  </span>
+                  <span class="mono hist-count">{h.count}</span>
+                </div>
+              ))}
+            </div>
+            <p class="mono hist-note">based on {reviews.length} seeded reviews</p>
+          </div>
+
+          <div class="review-list">
+            {sortedReviews.map((r) => (
+              <article class="panel review-card">
+                <header class="rev-head">
+                  <StarRating rating={r.rating} showValue={false} />
+                  <h3>{r.title}</h3>
+                </header>
+                <p class="rev-body">{r.body}</p>
+                <footer class="rev-foot mono">
+                  <span class="rev-author">{r.author}</span>
+                  <span class="rev-date">{r.date}</span>
+                </footer>
+              </article>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div class="panel empty-state">
+          <p class="mono empty-code">// no reviews yet</p>
+          <p>No seeded trader reviews for {firm.name} at the moment.</p>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- OFFERS -->
+  <section class="fp-panel" data-panel="offers" hidden>
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Promo codes</p>
+          <h2>{firm.name} offers</h2>
+        </div>
+      </div>
+
+      {offers.length > 0 ? (
+        <div class="offer-grid">
+          {offers.map((o) => (
+            <article class="panel offer-block">
+              <div class="offer-top">
+                <span class="offer-title">{o.title}</span>
+                <DiscountBadge code={o.code} percentOff={o.percentOff} />
+              </div>
+              <p class="mono offer-code">
+                CODE <strong>{o.code}</strong>
+                {o.expires && <span class="offer-exp">· expires {o.expires}</span>}
+              </p>
+              <a class="btn btn-primary offer-cta" href={firm.website} rel="nofollow noopener" target="_blank">
+                Redeem at {firm.name} <span aria-hidden="true">↗</span>
+              </a>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div class="panel empty-state">
+          <p class="mono empty-code">// no active codes</p>
+          <p>
+            {firm.name} has no tracked promo codes right now. Browse
+            <a class="inline-link" href="/offers">all live offers</a> instead.
+          </p>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <script>
+    // Tab switching for the firm profile sections.
+    const tabs = document.querySelectorAll<HTMLButtonElement>('.fp-tab');
+    const panels = document.querySelectorAll<HTMLElement>('.fp-panel');
+
+    function activate(name: string): void {
+      tabs.forEach((t) =>
+        t.classList.toggle('is-active', t.dataset.tab === name),
+      );
+      panels.forEach((p) => {
+        const show = p.dataset.panel === name;
+        p.classList.toggle('is-visible', show);
+        if (show) p.removeAttribute('hidden');
+        else p.setAttribute('hidden', '');
+      });
+    }
+
+    tabs.forEach((t) =>
+      t.addEventListener('click', () => activate(t.dataset.tab ?? 'overview')),
+    );
+
+    document.querySelectorAll<HTMLButtonElement>('[data-jump]').forEach((b) =>
+      b.addEventListener('click', () => activate(b.dataset.jump ?? 'overview')),
+    );
+  </script>
+
+  <style>
+    .fp-hero {
+      padding: clamp(40px, 6vw, 72px) 0 clamp(24px, 3vw, 36px);
+      border-bottom: 1px solid var(--line);
+    }
+    .crumbs {
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: var(--faint);
+      display: flex;
+      gap: 8px;
+      margin-bottom: 26px;
+    }
+    .crumbs a:hover { color: var(--accent); }
+    .crumb-cur { color: var(--muted); }
+
+    .fp-head {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .logo-badge.xl {
+      width: 74px;
+      height: 74px;
+      font-size: 1.35rem;
+      border-radius: 18px;
+      box-shadow: 0 14px 34px -14px rgba(182, 240, 74, 0.55);
+    }
+    .fp-title { flex: 1; min-width: 220px; display: grid; gap: 10px; }
+    .fp-title h1 { font-size: clamp(1.7rem, 4vw, 2.6rem); }
+    .fp-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tag-est { color: var(--amber); border-color: rgba(255, 180, 84, 0.4); }
+    .fp-rating { display: grid; gap: 4px; justify-items: end; }
+    .fp-rcount { font-size: 0.72rem; color: var(--faint); }
+
+    .fp-summary {
+      margin-top: 22px;
+      max-width: 68ch;
+      color: var(--muted);
+      font-size: 1.02rem;
+    }
+    .fp-actions {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    /* tab bar */
+    .fp-tabbar-wrap { position: relative; z-index: 5; }
+    .fp-tabbar {
+      display: flex;
+      gap: 6px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(7, 11, 13, 0.92), rgba(7, 11, 13, 0.78));
+      backdrop-filter: blur(10px);
+      overflow-x: auto;
+    }
+    .fp-tab {
+      appearance: none;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      padding: 15px 16px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .fp-tab:hover { color: var(--text); }
+    .fp-tab.is-active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-count {
+      font-size: 0.64rem;
+      color: var(--faint);
+      border: 1px solid var(--line-bright);
+      border-radius: 999px;
+      padding: 1px 7px;
+      margin-left: 4px;
+    }
+    .fp-tab.is-active .tab-count { color: var(--accent); border-color: rgba(182, 240, 74, 0.4); }
+
+    .fp-panel { padding-block: clamp(36px, 5vw, 56px); }
+
+    /* overview layout */
+    .fp-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+    .fp-main, .review-list { display: grid; gap: 20px; }
+    .block { padding: 26px; display: grid; gap: 16px; }
+    .block h2 { font-size: 1.15rem; }
+
+    .glance {
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px 20px;
+    }
+    .glance dt {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 4px;
+    }
+    .glance dd { margin: 0; font-size: 0.95rem; }
+
+    .platform-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tag.plat { color: var(--text); font-size: 0.72rem; }
+    .lev-matrix { border: 1px solid var(--line); border-radius: var(--radius-sm); }
+    .table-scroll { overflow-x: auto; }
+    .assets-line { font-size: 0.72rem; color: var(--faint); letter-spacing: 0.06em; }
+
+    .rule-grid {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    .rule {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      background: rgba(27, 42, 49, 0.22);
+    }
+    .rule-name { font-size: 0.88rem; }
+    .rule-state { font-size: 0.7rem; letter-spacing: 0.06em; }
+    .rule.ok .rule-state { color: var(--accent); }
+    .rule.no .rule-state { color: var(--loss); }
+    .rule.warn .rule-state { color: var(--amber); }
+    .restricted {
+      font-size: 0.74rem;
+      color: var(--muted);
+      border-top: 1px dashed var(--line);
+      padding-top: 14px;
+    }
+    .restricted-label { color: var(--loss); letter-spacing: 0.1em; }
+
+    .side-block { gap: 14px; }
+    .side-note { font-size: 0.86rem; color: var(--muted); }
+    .side-cta { align-self: start; font-size: 0.75rem; }
+    .fp-side { display: grid; gap: 20px; }
+    .jump { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+    .jump button {
+      appearance: none;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      padding: 6px 0;
+      cursor: pointer;
+      transition: color 0.15s ease, padding-left 0.15s ease;
+    }
+    .jump button:hover { color: var(--accent); padding-left: 6px; }
+
+    /* empty states */
+    .empty-state {
+      padding: 36px;
+      display: grid;
+      gap: 10px;
+      justify-items: start;
+    }
+    .empty-code {
+      font-size: 0.74rem;
+      letter-spacing: 0.14em;
+      color: var(--amber);
+    }
+    .inline-link { color: var(--accent); border-bottom: 1px solid rgba(182, 240, 74, 0.4); }
+    .inline-link:hover { border-bottom-color: var(--accent); }
+
+    /* reviews */
+    .reviews-grid {
+      display: grid;
+      grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+    .histogram-card {
+      padding: 26px;
+      display: grid;
+      gap: 14px;
+      justify-items: start;
+    }
+    .hist-score { font-size: 2.6rem; font-weight: 600; color: var(--amber); line-height: 1; }
+    .hist-bars { width: 100%; display: grid; gap: 8px; }
+    .hist-row { display: grid; grid-template-columns: 26px 1fr 26px; align-items: center; gap: 10px; }
+    .hist-label { font-size: 0.68rem; color: var(--faint); }
+    .hist-track {
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(27, 42, 49, 0.6);
+      overflow: hidden;
+    }
+    .hist-fill {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent-dim), var(--amber));
+    }
+    .hist-count { font-size: 0.68rem; color: var(--muted); text-align: right; }
+    .hist-note { font-size: 0.66rem; color: var(--faint); letter-spacing: 0.08em; }
+
+    .review-card { padding: 22px; display: grid; gap: 10px; }
+    .rev-head { display: grid; gap: 6px; }
+    .rev-head h3 { font-size: 0.98rem; }
+    .rev-body { color: var(--muted); font-size: 0.92rem; }
+    .rev-foot {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: var(--faint);
+      border-top: 1px dashed var(--line);
+      padding-top: 10px;
+    }
+    .rev-author { color: var(--muted); }
+
+    /* offers */
+    .offer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 18px;
+    }
+    .offer-block { padding: 22px; display: grid; gap: 14px; }
+    .offer-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .offer-title { font-weight: 600; }
+    .offer-code { font-size: 0.78rem; color: var(--faint); }
+    .offer-code strong { color: var(--accent); letter-spacing: 0.12em; }
+    .offer-exp { color: var(--faint); }
+    .offer-cta { justify-self: start; font-size: 0.78rem; }
+
+    @media (max-width: 900px) {
+      .fp-grid { grid-template-columns: 1fr; }
+      .reviews-grid { grid-template-columns: 1fr; }
+      .fp-rating { justify-items: start; }
+    }
+  </style>
+</BaseLayout>

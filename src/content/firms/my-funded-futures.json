@@ -1,0 +1,21 @@
+{
+  "slug": "my-funded-futures",
+  "name": "My Funded Futures",
+  "logoInitials": "MF",
+  "vertical": "futures",
+  "country": "United States",
+  "founded": 2023,
+  "rating": 4.4,
+  "reviewCount": 472,
+  "platforms": ["Rithmic", "NinjaTrader", "Tradovate"],
+  "assets": ["indices", "energy", "metals"],
+  "payoutMethods": ["Bank transfer (ACH)"],
+  "leverage": { "indices": "1:20", "energy": "1:15" },
+  "rules": { "newsTrading": true, "eas": true, "overnight": "restricted", "swapFree": false },
+  "restrictedCountries": ["Iran", "North Korea", "Cuba"],
+  "maxAllocation": 150000,
+  "lastUpdated": "2026-08-24",
+  "website": "https://myfundedfutures.com",
+  "summary": "Futures-focused firm with simple 1-step evaluations, static or trailing drawdown options and twice-monthly payouts.",
+  "estimated": false
+}

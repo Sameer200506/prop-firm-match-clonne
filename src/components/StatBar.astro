@@ -1,0 +1,76 @@
+---
+interface Props {
+  firmCount: number;
+  challengeCount: number;
+  reviewCount: number;
+  offerCount: number;
+}
+
+const { firmCount, challengeCount, reviewCount, offerCount } = Astro.props;
+
+const stats = [
+  { label: 'Prop firms tracked', value: firmCount },
+  { label: 'Challenge programs', value: challengeCount },
+  { label: 'Trader reviews', value: reviewCount },
+  { label: 'Active discount codes', value: offerCount },
+];
+---
+
+<section class="statbar panel" aria-label="Platform statistics">
+  {stats.map((s, i) => (
+    <div class="stat rise" style={`--d:${0.15 + i * 0.08}s`}>
+      <span class="stat-value mono">{s.value}</span>
+      <span class="stat-label">{s.label}</span>
+    </div>
+  ))}
+</section>
+
+<style>
+  .statbar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: 22px 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .statbar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgba(182, 240, 74, 0.05), transparent 55%);
+    pointer-events: none;
+  }
+  .stat {
+    display: grid;
+    gap: 2px;
+    text-align: center;
+    padding: 6px 10px;
+    position: relative;
+  }
+  .stat + .stat::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 18%;
+    bottom: 18%;
+    width: 1px;
+    background: var(--line);
+  }
+  .stat-value {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    color: var(--accent);
+  }
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  @media (max-width: 640px) {
+    .statbar { grid-template-columns: 1fr 1fr; }
+    .stat:nth-child(3)::before { display: none; }
+  }
+</style>

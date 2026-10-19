@@ -1,0 +1,19 @@
+{
+  "slug": "alpha-futures",
+  "name": "Alpha Futures",
+  "logoInitials": "AF",
+  "vertical": "futures",
+  "country": "United States",
+  "founded": 2023,
+  "rating": 4.2,
+  "reviewCount": 154,
+  "platforms": ["Tradovate", "NinjaTrader", "Rithmic"],
+  "assets": ["indices", "energy"],
+  "leverage": { "futures": "n/a" },
+  "restrictedCountries": [],
+  "maxAllocation": 150000,
+  "lastUpdated": "2026-08-24",
+  "website": "https://alphafutures.com",
+  "summary": "Directory listing: futures evaluations with static and trailing drawdown options and 90% profit split.",
+  "estimated": true
+}

@@ -1,0 +1,156 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import StatBar from '../components/StatBar.astro';
+import FirmCard from '../components/FirmCard.astro';
+import DiscountBadge from '../components/DiscountBadge.astro';
+
+const firms = await getCollection('firms');
+const challenges = await getCollection('challenges');
+const offers = await getCollection('offers');
+const reviews = await getCollection('reviews');
+
+const firmBySlug = new Map(firms.map((f) => [f.data.slug, f.data]));
+
+// Ranked grid: top firms by rating, then review count.
+const ranked = [...firms]
+  .sort(
+    (a, b) =>
+      b.data.rating - a.data.rating || b.data.reviewCount - a.data.reviewCount,
+  )
+  .slice(0, 12);
+
+const sortedOffers = [...offers].sort((a, b) => b.data.percentOff - a.data.percentOff);
+---
+
+<BaseLayout title="Compare the best prop trading firms">
+  <!-- HERO -->
+  <section class="hero glow-field">
+    <div class="wrap hero-inner">
+      <p class="kicker rise">Independent prop firm intelligence</p>
+      <h1 class="rise" style="--d:0.08s">
+        Compare the best<br />
+        <span class="accent-text">prop trading firms</span>
+      </h1>
+      <p class="hero-sub rise" style="--d:0.16s">
+        Ratings, challenge rules, fees, profit splits and verified discount
+        codes for {firms.length}+ funded-trading programs — researched, ranked
+        and refreshed. No fluff, just the numbers that matter.
+      </p>
+      <div class="hero-cta rise" style="--d:0.24s">
+        <a class="btn btn-primary" href="/prop-firms/">Browse all firms</a>
+        <a class="btn btn-ghost" href="#rankings">See the rankings</a>
+      </div>
+
+      <div class="rise" style="--d:0.32s">
+        <StatBar
+          firmCount={firms.length}
+          challengeCount={challenges.length}
+          reviewCount={reviews.length}
+          offerCount={offers.length}
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- OFFERS STRIP -->
+  <section class="section offers-section" aria-label="Active discount codes">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Live codes</p>
+          <h2>Discounts &amp; offers</h2>
+        </div>
+        <a class="btn btn-ghost" href="/offers">All offers</a>
+      </div>
+
+      <div class="offers-strip">
+        {sortedOffers.map((offer, i) => {
+          const firm = firmBySlug.get(offer.data.firm);
+          return (
+            <article class="panel offer-card rise" style={`--d:${0.05 * i}s`}>
+              <div class="offer-top">
+                <span class="offer-firm">{firm?.name ?? offer.data.firm}</span>
+                <DiscountBadge code={offer.data.code} percentOff={offer.data.percentOff} />
+              </div>
+              <p class="offer-title">{offer.data.title}</p>
+              <p class="mono offer-code">
+                CODE <strong>{offer.data.code}</strong>
+                {offer.data.expires && <span class="offer-exp">· expires {offer.data.expires}</span>}
+              </p>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <!-- RANKED FIRM GRID -->
+  <section class="section rankings" id="rankings" aria-label="Ranked prop firms">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Editor's ranking</p>
+          <h2>Top-rated prop firms</h2>
+        </div>
+        <p class="muted head-note mono">ordered by community rating</p>
+      </div>
+
+      <div class="firm-grid">
+        {ranked.map((firm, i) => (
+          <FirmCard firm={firm.data} rank={i + 1} delay={0.04 * (i % 4)} />
+        ))}
+      </div>
+
+      <div class="rankings-cta">
+        <a class="btn btn-primary" href="/prop-firms/">
+          Explore the full directory →
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding: clamp(64px, 9vw, 120px) 0 clamp(48px, 6vw, 80px);
+    border-bottom: 1px solid var(--line);
+  }
+  .hero-inner { display: grid; gap: 22px; justify-items: start; max-width: var(--wrap); }
+  .hero-sub {
+    max-width: 56ch;
+    color: var(--muted);
+    font-size: clamp(0.98rem, 1.4vw, 1.12rem);
+  }
+  .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+  .hero-inner > .rise:last-child { width: 100%; }
+  .hero-inner :global(.statbar) { width: 100%; margin-top: 18px; }
+
+  .offers-section { padding-bottom: 0; }
+  .offers-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 16px;
+  }
+  .offer-card {
+    padding: 18px;
+    display: grid;
+    gap: 10px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .offer-card:hover { transform: translateY(-3px); border-color: var(--line-bright); }
+  .offer-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .offer-firm { font-weight: 700; font-size: 0.95rem; }
+  .offer-title { color: var(--muted); font-size: 0.88rem; min-height: 2.6em; }
+  .offer-code { font-size: 0.78rem; color: var(--faint); }
+  .offer-code strong { color: var(--accent); letter-spacing: 0.1em; }
+  .offer-exp { color: var(--faint); }
+
+  .firm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  .head-note { font-size: 0.72rem; letter-spacing: 0.1em; }
+  .rankings-cta { display: grid; place-items: center; margin-top: 40px; }
+</style>

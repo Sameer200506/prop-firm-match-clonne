@@ -1,0 +1,57 @@
+[
+  { "id": "ftmo-rev-1", "firm": "ftmo", "author": "Marcus T.", "rating": 5, "title": "The gold standard for a reason", "body": "Passed the 100K Challenge in six weeks and got my first payout two weeks later, fee refund included. Rules are strict but crystal clear.", "date": "2026-07-12" },
+  { "id": "ftmo-rev-2", "firm": "ftmo", "author": "Elena V.", "rating": 5, "title": "Reliable payouts since 2021", "body": "I have been funded with FTMO for years. Support answers fast, payouts never miss, and the analytics dashboard genuinely helps.", "date": "2026-06-03" },
+  { "id": "ftmo-rev-3", "firm": "ftmo", "author": "Dev P.", "rating": 4, "title": "Great firm, pricey fees", "body": "Everything works as advertised, but the 100K fee hurts. Use a discount code and watch the news-trading window around big releases.", "date": "2026-04-28" },
+
+  { "id": "fundednext-rev-1", "firm": "fundednext", "author": "Sami K.", "rating": 5, "title": "Payouts are genuinely fast", "body": "Stellar 100K passed, first payout landed in under a week. The 15% discount made the fee a no-brainer.", "date": "2026-07-30" },
+  { "id": "fundednext-rev-2", "firm": "fundednext", "author": "Rachel O.", "rating": 4, "title": "Solid, busy support", "body": "Good platform choice and the profit split climbs to 95%. Support can be slow on weekends but nothing ever got lost.", "date": "2026-05-19" },
+  { "id": "fundednext-rev-3", "firm": "fundednext", "author": "Tomás R.", "rating": 5, "title": "Best 1-step I have tried", "body": "The 1-step 100K with a single 10% target suited my swing style. No time limits, no pressure.", "date": "2026-03-14" },
+
+  { "id": "fundingpips-rev-1", "firm": "fundingpips", "author": "Nadia H.", "rating": 5, "title": "Cheapest serious firm around", "body": "50K two-step for under $270 and payouts on demand. You cannot beat that value.", "date": "2026-08-02" },
+  { "id": "fundingpips-rev-2", "firm": "fundingpips", "author": "Leo M.", "rating": 4, "title": "Fast payouts, tight rules", "body": "The 1-step daily loss is tight at 3%, but the on-demand payout cycle more than makes up for it.", "date": "2026-06-21" },
+  { "id": "fundingpips-rev-3", "firm": "fundingpips", "author": "Grace L.", "rating": 5, "title": "Match-Trade support is a plus", "body": "Moved over after platform issues elsewhere. Four platforms to choose from and zero payout drama so far.", "date": "2026-04-09" },
+
+  { "id": "the5ers-rev-1", "firm": "the5ers", "author": "Omar B.", "rating": 5, "title": "Scaling plan is the real deal", "body": "Started at $25K, now doubled twice. The path from 85% to 100% split up to $2.5M is unique in this industry.", "date": "2026-07-08" },
+  { "id": "the5ers-rev-2", "firm": "the5ers", "author": "Hannah S.", "rating": 4, "title": "Veteran firm, lower leverage", "body": "FX leverage is around 1:30 so size your risk accordingly. Otherwise rock solid and very transparent.", "date": "2026-05-27" },
+  { "id": "the5ers-rev-3", "firm": "the5ers", "author": "Victor N.", "rating": 5, "title": "Bootcamp was perfect for me", "body": "The low-cost bootcamp entry let me prove myself before paying real fees. Passed and got funded within a month.", "date": "2026-02-18" },
+
+  { "id": "e8-markets-rev-1", "firm": "e8-markets", "author": "Priya D.", "rating": 4, "title": "Simple one-step, fair rules", "body": "6% target with a 4% daily limit is achievable with normal risk management. Dashboard is slick.", "date": "2026-06-30" },
+  { "id": "e8-markets-rev-2", "firm": "e8-markets", "author": "Jon W.", "rating": 5, "title": "Great entry price", "body": "Got my 50K evaluation for barely over $100 with the sale. Payout came on day 8 without hassle.", "date": "2026-05-05" },
+  { "id": "e8-markets-rev-3", "firm": "e8-markets", "author": "Aisha F.", "rating": 4, "title": "Good, keep an eye on slippage", "body": "Overall positive. News-time slippage on the 1-step is the only gripe; trade around it and you are fine.", "date": "2026-03-22" },
+
+  { "id": "topstep-rev-1", "firm": "topstep", "author": "Kyle D.", "rating": 5, "title": "Twelve years of consistency", "body": "Topstep is the only futures firm I trust long-term. Five winning days and the payout clears. Simple.", "date": "2026-07-17" },
+  { "id": "topstep-rev-2", "firm": "topstep", "author": "Monica G.", "rating": 4, "title": "Trailing DD takes practice", "body": "The intraday trailing drawdown punishes over-sizing. Once I adapted, passing the 50K Combine was straightforward.", "date": "2026-06-11" },
+  { "id": "topstep-rev-3", "firm": "topstep", "author": "Andre C.", "rating": 5, "title": "Best platform lineup in futures", "body": "Tradovate plus TradingView charts is my whole stack. Payouts always arrive on schedule.", "date": "2026-04-02" },
+
+  { "id": "alpha-capital-group-rev-1", "firm": "alpha-capital-group", "author": "Sophie R.", "rating": 5, "title": "90% split from day one", "body": "Passed the 100K two-step and the 90% split applies immediately. ACG Markets platform keeps improving.", "date": "2026-07-25" },
+  { "id": "alpha-capital-group-rev-2", "firm": "alpha-capital-group", "author": "Bilal A.", "rating": 4, "title": "Scaling to 500K kept me", "body": "The scaling plan is realistic and the community is active. Payouts could be slightly faster.", "date": "2026-05-31" },
+  { "id": "alpha-capital-group-rev-3", "firm": "alpha-capital-group", "author": "Chris E.", "rating": 4, "title": "Instant funding is legit", "body": "Took the instant route on a smaller account to test the waters. Payout worked exactly as described.", "date": "2026-03-08" },
+
+  { "id": "blue-guardian-rev-1", "firm": "blue-guardian", "author": "Liam F.", "rating": 4, "title": "Guardian Shield saved me", "body": "The Shield stopped me out before breaching drawdown during NFP. That feature alone is worth the fee.", "date": "2026-08-05" },
+  { "id": "blue-guardian-rev-2", "firm": "blue-guardian", "author": "Zoe T.", "rating": 5, "title": "Keeping 100% of the first 15K", "body": "Nothing else comes close for early payouts. After that the 90/10 split is still industry-leading.", "date": "2026-06-14" },
+  { "id": "blue-guardian-rev-3", "firm": "blue-guardian", "author": "Noah I.", "rating": 4, "title": "Tight daily loss, fair targets", "body": "3% daily is tight but the 9% single target is generous. Payout weekly cadence is great.", "date": "2026-04-19" },
+
+  { "id": "apex-trader-funding-rev-1", "firm": "apex-trader-funding", "author": "Jordan P.", "rating": 5, "title": "80% off sales are real", "body": "Passed a 100K eval bought during a sale for under $60. Payouts hit my bank within two days.", "date": "2026-07-21" },
+  { "id": "apex-trader-funding-rev-2", "firm": "apex-trader-funding", "author": "Tara W.", "rating": 4, "title": "Great value, respect the trail", "body": "No daily loss limit is liberating but the intraday trailing will bite if you ignore it. Otherwise excellent.", "date": "2026-05-16" },
+  { "id": "apex-trader-funding-rev-3", "firm": "apex-trader-funding", "author": "Miguel S.", "rating": 4, "title": "Perfect for multi-account scaling", "body": "Running three 150K accounts. The consistency rule is fair and the twice-monthly payout cycle works.", "date": "2026-03-29" },
+
+  { "id": "funded-trading-plus-rev-1", "firm": "funded-trading-plus", "author": "Imogen K.", "rating": 4, "title": "No time limits at all", "body": "Took my time on the 1-step with zero deadline stress. Payout arrived within the promised week.", "date": "2026-06-26" },
+  { "id": "funded-trading-plus-rev-2", "firm": "funded-trading-plus", "author": "Ryan H.", "rating": 4, "title": "Quietly dependable", "body": "Not the flashiest firm, but the rules are stable and payouts are consistent. Exactly what I want.", "date": "2026-04-30" },
+  { "id": "funded-trading-plus-rev-3", "firm": "funded-trading-plus", "author": "Freya J.", "rating": 4, "title": "Instant option worth a look", "body": "The instant funding account has tighter targets but you skip evaluations entirely. Good for experienced traders.", "date": "2026-02-27" },
+
+  { "id": "maven-trading-rev-1", "firm": "maven-trading", "author": "Dario C.", "rating": 4, "title": "$30 entry is unbeatable", "body": "Tested my strategy on the 5K for the price of a pizza. Passed and upgraded with the profits.", "date": "2026-07-03" },
+  { "id": "maven-trading-rev-2", "firm": "maven-trading", "author": "Kelly N.", "rating": 4, "title": "Weekly payouts, relaxed rules", "body": "News trading allowed, swap-free accounts, weekly payouts. Everything a swing trader needs.", "date": "2026-05-24" },
+  { "id": "maven-trading-rev-3", "firm": "maven-trading", "author": "Umar Q.", "rating": 4, "title": "Small firm, big effort", "body": "Support knows my name. The platform migrated smoothly and my payout schedule never slipped.", "date": "2026-03-17" },
+
+  { "id": "my-funded-futures-rev-1", "firm": "my-funded-futures", "author": "Stacey B.", "rating": 5, "title": "Cleanest futures rules I have seen", "body": "Simple targets, clearly defined drawdown, payouts every two weeks without drama.", "date": "2026-07-27" },
+  { "id": "my-funded-futures-rev-2", "firm": "my-funded-futures", "author": "Hank R.", "rating": 4, "title": "Solid for micro traders", "body": "I trade micros on the 50K. The 2.5% daily buffer is enough if you size properly.", "date": "2026-05-09" },
+  { "id": "my-funded-futures-rev-3", "firm": "my-funded-futures", "author": "Ivy L.", "rating": 4, "title": "Fast answers, fair pricing", "body": "Support replies within hours. Reset fees are reasonable and the payout process is documented step by step.", "date": "2026-02-11" },
+
+  { "id": "lucid-trading-rev-1", "firm": "lucid-trading", "author": "Peter V.", "rating": 5, "title": "Payouts in days, not weeks", "body": "Requested my first payout after five winning days and it cleared almost immediately. Unheard of speed.", "date": "2026-08-09" },
+  { "id": "lucid-trading-rev-2", "firm": "lucid-trading", "author": "Dana M.", "rating": 4, "title": "EOD trailing is the way", "body": "LucidFlex EOD drawdown lets me hold through intraday noise. Exactly how futures firms should work.", "date": "2026-06-07" },
+  { "id": "lucid-trading-rev-3", "firm": "lucid-trading", "author": "Owen G.", "rating": 5, "title": "Switched from Apex, no regrets", "body": "Lower fees with discount, friendlier drawdown, faster money. The dashboard is clean too.", "date": "2026-04-15" },
+
+  { "id": "tradeify-rev-1", "firm": "tradeify", "author": "Nina S.", "rating": 4, "title": "Straight funded is a game changer", "body": "Skipped the evaluation entirely on the straight-funded account. Daily payouts kicked in after activation.", "date": "2026-07-14" },
+  { "id": "tradeify-rev-2", "firm": "tradeify", "author": "Carl J.", "rating": 4, "title": "Quick onboarding, fair rules", "body": "From sign-up to trading in under 20 minutes. Targets are realistic for intraday traders.", "date": "2026-05-02" },
+  { "id": "tradeify-rev-3", "firm": "tradeify", "author": "Beth Y.", "rating": 5, "title": "The payout speed is real", "body": "Weekly payouts land fast, and the consistency rule is clearly explained upfront. No surprises.", "date": "2026-03-05" }
+]

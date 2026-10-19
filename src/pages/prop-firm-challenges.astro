@@ -1,0 +1,320 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { formatUsd, formatUsdShort } from '../utils/format';
+
+const firms = await getCollection('firms');
+const challenges = await getCollection('challenges');
+
+const firmBySlug = new Map(firms.map((f) => [f.data.slug, f.data]));
+
+// Sort challenges by firm rating (desc) then account size for a stable read.
+const rows = [...challenges]
+  .map((c) => {
+    const firm = firmBySlug.get(c.data.firm);
+    return {
+      data: c.data,
+      firmName: firm?.name ?? c.data.firm,
+      firmRating: firm?.rating ?? 0,
+      effectivePrice: c.data.discountedPrice ?? c.data.price,
+    };
+  })
+  .sort(
+    (a, b) =>
+      b.firmRating - a.firmRating || a.data.accountSize - b.data.accountSize,
+  );
+
+const firmOptions = [...new Set(rows.map((r) => r.data.firm))]
+  .map((slug) => ({ slug, name: firmBySlug.get(slug)?.name ?? slug }))
+  .sort((a, b) => a.name.localeCompare(b.name));
+
+const drawdownLabel: Record<string, string> = {
+  static: 'Static',
+  'eod-trailing': 'EOD trailing',
+  'intraday-trailing': 'Intraday trailing',
+  'balance-based': 'Balance-based',
+};
+---
+
+<BaseLayout
+  title="All Prop Firm Challenges — Fees, Targets & Splits"
+  description="Every tracked prop trading challenge in one table: account size, steps, profit targets, daily/max loss, drawdown type, profit split, payout cadence and fees — filterable and sortable."
+>
+  <section class="ch-hero glow-field">
+    <div class="wrap">
+      <p class="kicker rise">Challenge matrix</p>
+      <h1 class="rise" style="--d:0.06s">
+        Every challenge,<br /><span class="accent-text">one table</span>
+      </h1>
+      <p class="ch-sub rise" style="--d:0.12s">
+        {rows.length} funded-trader evaluations across
+        {firmOptions.length} firms. Filter by firm, steps, split and account
+        size — click the fee header to sort by price.
+      </p>
+    </div>
+  </section>
+
+  <section class="section ch-section">
+    <div class="wrap">
+      <!-- FILTER BAR -->
+      <div class="panel filter-bar rise" style="--d:0.16s">
+        <div class="filter-field">
+          <label for="f-firm">Firm</label>
+          <select id="f-firm">
+            <option value="">All firms</option>
+            {firmOptions.map((f) => (<option value={f.slug}>{f.name}</option>))}
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="f-steps">Steps</label>
+          <select id="f-steps">
+            <option value="">Any</option>
+            <option value="1">1-step</option>
+            <option value="2">2-step</option>
+            <option value="3">3-step</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="f-split">Min split</label>
+          <select id="f-split">
+            <option value="">Any</option>
+            <option value="80">≥ 80%</option>
+            <option value="85">≥ 85%</option>
+            <option value="90">≥ 90%</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="f-max-account">Max account</label>
+          <select id="f-max-account">
+            <option value="">Any</option>
+            <option value="50000">≤ $50K</option>
+            <option value="100000">≤ $100K</option>
+            <option value="200000">≤ $200K</option>
+          </select>
+        </div>
+        <button class="btn btn-ghost reset" id="f-reset" type="button">Reset</button>
+        <p class="mono filter-count" id="f-count"></p>
+      </div>
+
+      <!-- TABLE -->
+      <div class="panel table-panel rise" style="--d:0.2s">
+        <div class="table-scroll">
+          <table class="data-table ch-table" id="ch-table">
+            <thead>
+              <tr>
+                <th scope="col">Firm</th>
+                <th scope="col">Account</th>
+                <th scope="col">Steps</th>
+                <th scope="col">Targets</th>
+                <th scope="col">Daily / Max</th>
+                <th scope="col">Drawdown</th>
+                <th scope="col">Split</th>
+                <th scope="col">Payouts</th>
+                <th scope="col">
+                  <button class="sort-btn mono" id="sort-price" type="button" title="Sort by fee">
+                    Fee <span class="sort-arrow" id="sort-arrow">↕</span>
+                  </button>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr
+                  data-firm={r.data.firm}
+                  data-steps={r.data.steps}
+                  data-split={r.data.profitSplitPct}
+                  data-account={r.data.accountSize}
+                  data-price={r.effectivePrice}
+                >
+                  <td>
+                    <a class="firm-link" href={`/prop-firms/${r.data.firm}/`}>{r.firmName}</a>
+                  </td>
+                  <td class="mono strong">{formatUsdShort(r.data.accountSize)}</td>
+                  <td class="mono">{r.data.steps}-step</td>
+                  <td class="mono">{r.data.profitTargets.join('% / ')}%</td>
+                  <td class="mono">
+                    {r.data.dailyLossPct > 0 ? `${r.data.dailyLossPct}%` : '—'} / {r.data.maxLossPct}%
+                  </td>
+                  <td>{drawdownLabel[r.data.drawdownType]}</td>
+                  <td class="mono accent-text">{r.data.profitSplitPct}%</td>
+                  <td class="small">{r.data.payoutFrequency}</td>
+                  <td class="mono fee">
+                    {r.data.discountedPrice !== undefined ? (
+                      <>
+                        <span class="strike">{formatUsd(r.data.price)}</span>
+                        <span class="now">{formatUsd(r.data.discountedPrice)}</span>
+                      </>
+                    ) : (
+                      <span class="now">{formatUsd(r.data.price)}</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="empty-note mono hidden" id="ch-empty">
+          // no challenges match the current filters — try widening your search
+        </p>
+      </div>
+
+      <p class="mono data-note rise" style="--d:0.24s">
+        Snapshot 2026-08-24 · discounted fees reflect our tracked promo codes ·
+        verify final pricing with each firm.
+      </p>
+    </div>
+  </section>
+
+  <script>
+    const table = document.getElementById('ch-table');
+    if (table) {
+      const tbody = table.querySelector('tbody')!;
+      const rows = Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr'));
+      const firmSel = document.getElementById('f-firm') as HTMLSelectElement;
+      const stepsSel = document.getElementById('f-steps') as HTMLSelectElement;
+      const splitSel = document.getElementById('f-split') as HTMLSelectElement;
+      const maxAccSel = document.getElementById('f-max-account') as HTMLSelectElement;
+      const resetBtn = document.getElementById('f-reset') as HTMLButtonElement;
+      const countEl = document.getElementById('f-count');
+      const emptyEl = document.getElementById('ch-empty');
+      const sortBtn = document.getElementById('sort-price') as HTMLButtonElement;
+      const sortArrow = document.getElementById('sort-arrow');
+
+      // Preserve the server-rendered order so "unsort" can restore it.
+      const originalOrder = [...rows];
+      let sortDir: 0 | 1 | -1 = 0; // 0 = original, 1 = asc, -1 = desc
+
+      function applyFilters(): void {
+        const firm = firmSel.value;
+        const steps = stepsSel.value;
+        const split = splitSel.value ? Number(splitSel.value) : 0;
+        const maxAcc = maxAccSel.value ? Number(maxAccSel.value) : Infinity;
+
+        let visible = 0;
+        for (const row of rows) {
+          const okFirm = !firm || row.dataset.firm === firm;
+          const okSteps = !steps || row.dataset.steps === steps;
+          const okSplit = split === 0 || Number(row.dataset.split) >= split;
+          const okAcc = Number(row.dataset.account) <= maxAcc;
+          const show = okFirm && okSteps && okSplit && okAcc;
+          row.classList.toggle('hidden', !show);
+          if (show) visible += 1;
+        }
+        if (countEl) countEl.textContent = `// ${visible} of ${rows.length} shown`;
+        if (emptyEl) emptyEl.classList.toggle('hidden', visible !== 0);
+      }
+
+      function applySort(): void {
+        const ordered =
+          sortDir === 0
+            ? originalOrder
+            : [...rows].sort((a, b) => {
+                const diff = Number(a.dataset.price) - Number(b.dataset.price);
+                return sortDir === 1 ? diff : -diff;
+              });
+        for (const row of ordered) tbody.appendChild(row);
+        if (sortArrow) {
+          sortArrow.textContent = sortDir === 1 ? '↑' : sortDir === -1 ? '↓' : '↕';
+        }
+      }
+
+      sortBtn.addEventListener('click', () => {
+        sortDir = sortDir === 1 ? -1 : sortDir === -1 ? 0 : 1;
+        applySort();
+      });
+
+      [firmSel, stepsSel, splitSel, maxAccSel].forEach((el) =>
+        el.addEventListener('change', applyFilters),
+      );
+      resetBtn.addEventListener('click', () => {
+        firmSel.value = '';
+        stepsSel.value = '';
+        splitSel.value = '';
+        maxAccSel.value = '';
+        sortDir = 0;
+        applySort();
+        applyFilters();
+      });
+
+      applyFilters();
+    }
+  </script>
+
+  <style>
+    .ch-hero {
+      padding: clamp(56px, 8vw, 100px) 0 clamp(32px, 4vw, 48px);
+      border-bottom: 1px solid var(--line);
+    }
+    .ch-hero h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); }
+    .ch-sub { margin-top: 14px; color: var(--muted); max-width: 58ch; }
+
+    .ch-section { padding-top: 32px; }
+
+    .filter-bar {
+      display: flex;
+      align-items: end;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+    }
+    .filter-field { display: grid; gap: 0.35em; min-width: 150px; }
+    .filter-bar .reset { align-self: end; font-size: 0.74rem; padding: 0.7em 1.2em; }
+    .filter-count {
+      margin: 0 0 0 auto;
+      align-self: center;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      color: var(--faint);
+    }
+
+    .table-panel { overflow: hidden; }
+    .table-scroll { overflow-x: auto; }
+    .ch-table td { font-size: 0.9rem; }
+    .firm-link { color: var(--text); font-weight: 600; white-space: nowrap; }
+    .firm-link:hover { color: var(--accent); }
+    .strong { font-weight: 600; }
+    .small { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+    .fee { white-space: nowrap; }
+    .strike {
+      color: var(--faint);
+      text-decoration: line-through;
+      margin-right: 8px;
+      font-size: 0.8rem;
+    }
+    .now { color: var(--text); font-weight: 600; }
+
+    .sort-btn {
+      appearance: none;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+      color: var(--faint);
+      transition: color 0.15s ease;
+    }
+    .sort-btn:hover { color: var(--accent); }
+    .sort-arrow { color: var(--accent); }
+
+    .empty-note {
+      margin: 0;
+      padding: 22px 18px;
+      font-size: 0.8rem;
+      color: var(--amber);
+      border-top: 1px dashed var(--line);
+    }
+    .data-note {
+      margin-top: 16px;
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      color: var(--faint);
+    }
+
+    @media (max-width: 640px) {
+      .filter-count { margin-left: 0; }
+    }
+  </style>
+</BaseLayout>

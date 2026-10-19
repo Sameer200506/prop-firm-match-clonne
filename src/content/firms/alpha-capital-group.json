@@ -1,0 +1,22 @@
+{
+  "slug": "alpha-capital-group",
+  "name": "Alpha Capital Group",
+  "logoInitials": "AC",
+  "vertical": "cfd",
+  "country": "United Kingdom",
+  "founded": 2021,
+  "rating": 4.5,
+  "reviewCount": 986,
+  "platforms": ["MT5", "ACG Markets"],
+  "assets": ["fx", "metals", "indices", "energy", "crypto"],
+  "payoutMethods": ["Bank transfer", "Crypto"],
+  "leverage": { "fx": "1:100", "metals": "1:20", "indices": "1:20", "crypto": "1:2" },
+  "rules": { "newsTrading": true, "eas": true, "overnight": true, "swapFree": true },
+  "restrictedCountries": ["United States", "Iran", "North Korea"],
+  "maxAllocation": 200000,
+  "scalingCap": 500000,
+  "lastUpdated": "2026-08-24",
+  "website": "https://alphacapitalgroup.uk",
+  "summary": "London-based firm with a 90% profit split, 1:100 FX leverage, an instant-funding option and scaling up to $500K.",
+  "estimated": false
+}

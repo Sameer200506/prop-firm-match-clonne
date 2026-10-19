@@ -1,0 +1,39 @@
+[
+  {
+    "code": "MATCH",
+    "firm": "ftmo",
+    "id": "offer-ftmo-match",
+    "percentOff": 10,
+    "title": "10% off all FTMO Challenges"
+  },
+  {
+    "code": "FN15",
+    "firm": "fundednext",
+    "id": "offer-fundednext-15",
+    "percentOff": 15,
+    "title": "15% off FundedNext evaluations"
+  },
+  {
+    "code": "APEX80",
+    "expires": "2026-09-30",
+    "firm": "apex-trader-funding",
+    "id": "offer-apex-80",
+    "percentOff": 80,
+    "title": "80% off Apex evaluations"
+  },
+  {
+    "code": "PIP5",
+    "firm": "fundingpips",
+    "id": "offer-fundingpips-5",
+    "percentOff": 5,
+    "title": "5% off FundingPips programs"
+  },
+  {
+    "code": "GUARD8",
+    "expires": "2026-12-31",
+    "firm": "blue-guardian",
+    "id": "offer-blue-guardian-8",
+    "percentOff": 8,
+    "title": "8% off Blue Guardian challenges"
+  }
+]

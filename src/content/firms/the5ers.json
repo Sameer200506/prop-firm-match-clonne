@@ -1,0 +1,50 @@
+{
+  "assets": [
+    "fx",
+    "metals",
+    "indices"
+  ],
+  "country": "Israel",
+  "estimated": false,
+  "founded": 2016,
+  "lastUpdated": "2026-08-25",
+  "leverage": {
+    "fx": "1:30",
+    "indices": "1:10",
+    "metals": "1:20"
+  },
+  "logoInitials": "5R",
+  "maxAllocation": 100000,
+  "name": "The5ers",
+  "payoutMethods": [
+    "Bank transfer",
+    "PayPal",
+    "Wise",
+    "Crypto"
+  ],
+  "platforms": [
+    "MT5"
+  ],
+  "rating": 4.6,
+  "restrictedCountries": [
+    "United States",
+    "Iran",
+    "North Korea"
+  ],
+  "reviewCount": 1904,
+  "rules": {
+    "eas": true,
+    "newsTrading": true,
+    "overnight": true,
+    "swapFree": true
+  },
+  "scalingCap": 2500000,
+  "scrape": {
+    "lastAttempt": "2026-08-25T11:24:12.863Z",
+    "status": "updated"
+  },
+  "slug": "the5ers",
+  "summary": "One of the oldest prop firms, known for its bootcamp and instant-funding routes and an aggressive scaling path from 85% to 100% profit split up to $2.5M.",
+  "vertical": "cfd",
+  "website": "https://the5ers.com"
+}

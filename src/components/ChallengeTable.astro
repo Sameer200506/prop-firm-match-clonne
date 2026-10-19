@@ -1,0 +1,87 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatUsd, formatUsdShort } from '../utils/format';
+
+interface Props {
+  challenges: CollectionEntry<'challenges'>['data'][];
+  caption?: string;
+}
+
+const { challenges, caption } = Astro.props;
+
+const drawdownLabel: Record<string, string> = {
+  static: 'Static',
+  'eod-trailing': 'EOD trailing',
+  'intraday-trailing': 'Intraday trailing',
+  'balance-based': 'Balance-based',
+};
+---
+
+<div class="panel table-panel">
+  <div class="table-scroll">
+    <table class="data-table">
+      {caption && <caption class="mono table-caption">{caption}</caption>}
+      <thead>
+        <tr>
+          <th scope="col">Account</th>
+          <th scope="col">Steps</th>
+          <th scope="col">Targets</th>
+          <th scope="col">Daily / Max loss</th>
+          <th scope="col">Drawdown</th>
+          <th scope="col">Split</th>
+          <th scope="col">Payouts</th>
+          <th scope="col">Fee</th>
+        </tr>
+      </thead>
+      <tbody>
+        {challenges.map((c) => (
+          <tr>
+            <td class="mono strong">{formatUsdShort(c.accountSize)}</td>
+            <td class="mono">{c.steps}-step</td>
+            <td class="mono">{c.profitTargets.join('% / ')}%</td>
+            <td class="mono">
+              {c.dailyLossPct > 0 ? `${c.dailyLossPct}%` : '—'} / {c.maxLossPct}%
+            </td>
+            <td>{drawdownLabel[c.drawdownType]}</td>
+            <td class="mono accent-text">{c.profitSplitPct}%</td>
+            <td class="small">{c.payoutFrequency}</td>
+            <td class="mono fee">
+              {c.discountedPrice !== undefined ? (
+                <>
+                  <span class="strike">{formatUsd(c.price)}</span>
+                  <span class="now">{formatUsd(c.discountedPrice)}</span>
+                </>
+              ) : (
+                <span class="now">{formatUsd(c.price)}</span>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  .table-panel { overflow: hidden; }
+  .table-scroll { overflow-x: auto; }
+  .table-caption {
+    caption-side: top;
+    text-align: left;
+    padding: 14px 16px 0;
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  .strong { font-weight: 600; }
+  .small { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+  .fee { white-space: nowrap; }
+  .strike {
+    color: var(--faint);
+    text-decoration: line-through;
+    margin-right: 8px;
+    font-size: 0.8rem;
+  }
+  .now { color: var(--text); font-weight: 600; }
+</style>

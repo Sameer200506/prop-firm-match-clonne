@@ -1,0 +1,22 @@
+{
+  "slug": "apex-trader-funding",
+  "name": "Apex Trader Funding",
+  "logoInitials": "AX",
+  "vertical": "futures",
+  "country": "United States",
+  "founded": 2021,
+  "rating": 4.5,
+  "reviewCount": 3105,
+  "platforms": ["Rithmic", "Tradovate", "NinjaTrader", "TradingView"],
+  "assets": ["indices", "energy", "metals"],
+  "payoutMethods": ["Bank transfer (ACH)", "PayPal"],
+  "leverage": { "indices": "1:20", "energy": "1:15" },
+  "rules": { "newsTrading": true, "eas": true, "overnight": "restricted", "swapFree": false },
+  "restrictedCountries": ["Iran", "North Korea", "Cuba"],
+  "discount": { "code": "APEX80", "percentOff": 80 },
+  "maxAllocation": 300000,
+  "lastUpdated": "2026-08-24",
+  "website": "https://apextraderfunding.com",
+  "summary": "High-volume futures firm with a single-step evaluation, intraday trailing drawdown and frequent 80-90% off sales across $50K-$300K accounts.",
+  "estimated": false
+}

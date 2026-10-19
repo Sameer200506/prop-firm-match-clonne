@@ -1,0 +1,63 @@
+{
+  "assets": [
+    "fx",
+    "metals",
+    "indices",
+    "energy",
+    "crypto"
+  ],
+  "country": "Czech Republic",
+  "discount": {
+    "code": "MATCH",
+    "percentOff": 10
+  },
+  "estimated": false,
+  "founded": 2015,
+  "lastUpdated": "2026-08-25",
+  "leverage": {
+    "crypto": "1:5",
+    "energy": "1:20",
+    "fx": "1:100",
+    "indices": "1:20",
+    "metals": "1:50"
+  },
+  "logoInitials": "FT",
+  "maxAllocation": 200000,
+  "name": "FTMO",
+  "payoutMethods": [
+    "Bank transfer",
+    "PayPal",
+    "Skrill",
+    "Crypto"
+  ],
+  "platforms": [
+    "MT4",
+    "MT5",
+    "cTrader",
+    "DxTrade"
+  ],
+  "rating": 4.8,
+  "restrictedCountries": [
+    "United States",
+    "Canada",
+    "Iran",
+    "North Korea",
+    "Russia"
+  ],
+  "reviewCount": 3412,
+  "rules": {
+    "eas": true,
+    "newsTrading": "restricted",
+    "overnight": true,
+    "swapFree": true
+  },
+  "scalingCap": 400000,
+  "scrape": {
+    "lastAttempt": "2026-08-25T11:24:03.003Z",
+    "status": "updated"
+  },
+  "slug": "ftmo",
+  "summary": "The long-standing industry benchmark: a two-step CFD evaluation with reliable payouts, a fee refund with the first payout and scaling up to $400K.",
+  "vertical": "cfd",
+  "website": "https://ftmo.com"
+}

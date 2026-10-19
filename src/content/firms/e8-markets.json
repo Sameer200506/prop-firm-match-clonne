@@ -1,0 +1,51 @@
+{
+  "assets": [
+    "fx",
+    "metals",
+    "indices",
+    "energy",
+    "crypto"
+  ],
+  "country": "United States",
+  "estimated": false,
+  "founded": 2021,
+  "lastUpdated": "2026-08-24",
+  "leverage": {
+    "crypto": "1:2",
+    "fx": "1:50",
+    "indices": "1:20",
+    "metals": "1:20"
+  },
+  "logoInitials": "E8",
+  "maxAllocation": 150000,
+  "name": "E8 Markets",
+  "payoutMethods": [
+    "Bank transfer",
+    "Crypto"
+  ],
+  "platforms": [
+    "MT5",
+    "E8X"
+  ],
+  "rating": 4.5,
+  "restrictedCountries": [
+    "Iran",
+    "North Korea"
+  ],
+  "reviewCount": 1287,
+  "rules": {
+    "eas": true,
+    "newsTrading": true,
+    "overnight": true,
+    "swapFree": false
+  },
+  "scrape": {
+    "detail": "bot protection (Cloudflare/WAF); existing data kept",
+    "lastAttempt": "2026-08-25T11:30:33.331Z",
+    "status": "blocked"
+  },
+  "slug": "e8-markets",
+  "summary": "Single-step evaluation specialist with a customisable dashboard, low entry fees from around $130 and an 80% profit split across $50K-$150K accounts.",
+  "vertical": "cfd",
+  "website": "https://e8markets.com"
+}

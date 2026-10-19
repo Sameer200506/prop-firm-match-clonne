@@ -1,0 +1,21 @@
+{
+  "slug": "tradeify",
+  "name": "Tradeify",
+  "logoInitials": "TF",
+  "vertical": "futures",
+  "country": "United States",
+  "founded": 2023,
+  "rating": 4.4,
+  "reviewCount": 508,
+  "platforms": ["Tradovate", "NinjaTrader", "Rithmic", "TradingView"],
+  "assets": ["indices", "energy", "metals"],
+  "payoutMethods": ["Bank transfer (ACH)", "PayPal"],
+  "leverage": { "indices": "1:20", "energy": "1:15" },
+  "rules": { "newsTrading": true, "eas": true, "overnight": true, "swapFree": false },
+  "restrictedCountries": ["Iran", "North Korea", "Cuba"],
+  "maxAllocation": 150000,
+  "lastUpdated": "2026-08-24",
+  "website": "https://tradeify.co",
+  "summary": "Futures firm with both evaluation and straight-funded accounts, daily payouts after a short activation period and lightning-fast onboarding.",
+  "estimated": false
+}

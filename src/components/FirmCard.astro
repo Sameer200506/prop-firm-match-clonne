@@ -1,0 +1,155 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import StarRating from './StarRating.astro';
+import DiscountBadge from './DiscountBadge.astro';
+import { formatUsdShort, verticalLabel } from '../utils/format';
+
+interface Props {
+  firm: CollectionEntry<'firms'>['data'];
+  rank?: number;
+  delay?: number;
+}
+
+const { firm, rank, delay = 0 } = Astro.props;
+---
+
+<article class="panel firm-card rise" style={`--d:${delay}s`}>
+  {rank !== undefined && <span class="rank mono" aria-label={`Rank ${rank}`}>#{rank}</span>}
+
+  <header class="fc-head">
+    <span class="logo-badge" aria-hidden="true">{firm.logoInitials}</span>
+    <div class="fc-title">
+      <h3>{firm.name}</h3>
+      <span class="mono fc-meta">{firm.country} · est. {firm.founded}</span>
+    </div>
+    {firm.discount && <DiscountBadge code={firm.discount.code} percentOff={firm.discount.percentOff} compact />}
+  </header>
+
+  <div class="fc-rating">
+    <StarRating rating={firm.rating} />
+    <span class="mono fc-reviews">{firm.reviewCount.toLocaleString('en-US')} reviews</span>
+  </div>
+
+  <p class="fc-summary">{firm.summary}</p>
+
+  <dl class="fc-stats">
+    <div>
+      <dt>Max allocation</dt>
+      <dd class="mono">{formatUsdShort(firm.maxAllocation)}</dd>
+    </div>
+    <div>
+      <dt>Vertical</dt>
+      <dd><span class={`tag tag-${firm.vertical}`}>{verticalLabel[firm.vertical]}</span></dd>
+    </div>
+    <div>
+      <dt>Platforms</dt>
+      <dd class="mono fc-platforms">{firm.platforms.slice(0, 3).join(' · ')}{firm.platforms.length > 3 ? ' +' : ''}</dd>
+    </div>
+  </dl>
+
+  <footer class="fc-foot">
+    <span class="fc-status mono">
+      {firm.estimated ? <span class="est">≈ estimated</span> : <span class="verified">verified data</span>}
+    </span>
+    <span class="fc-links">
+      <a class="fc-link mono" href={`/prop-firms/${firm.slug}/`}>View profile</a>
+      <a class="fc-link mono" href={firm.website} rel="nofollow noopener" target="_blank">
+        Visit site <span aria-hidden="true">↗</span>
+      </a>
+    </span>
+  </footer>
+</article>
+
+<style>
+  .firm-card {
+    position: relative;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+    overflow: hidden;
+  }
+  .firm-card::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .firm-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--line-bright);
+    box-shadow: 0 26px 48px -24px rgba(0, 0, 0, 0.9);
+  }
+  .firm-card:hover::after { opacity: 1; }
+
+  .rank {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    font-size: 0.72rem;
+    color: var(--faint);
+    letter-spacing: 0.08em;
+  }
+
+  .fc-head { display: flex; align-items: center; gap: 12px; }
+  .fc-title { min-width: 0; flex: 1; }
+  .fc-title h3 { font-size: 1rem; }
+  .fc-meta { font-size: 0.72rem; color: var(--faint); }
+
+  .fc-rating { display: flex; align-items: center; gap: 10px; }
+  .fc-reviews { font-size: 0.72rem; color: var(--muted); }
+
+  .fc-summary {
+    font-size: 0.87rem;
+    color: var(--muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .fc-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 16px;
+    margin: 0;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+  }
+  .fc-stats dt {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin-bottom: 3px;
+  }
+  .fc-stats dd { margin: 0; font-size: 0.88rem; }
+  .fc-platforms { font-size: 0.78rem; color: var(--muted); }
+
+  .fc-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+  .fc-status { font-size: 0.68rem; letter-spacing: 0.06em; }
+  .fc-status .verified { color: var(--accent); }
+  .fc-status .est { color: var(--amber); }
+  .fc-links { display: inline-flex; align-items: center; gap: 14px; }
+  .fc-link {
+    font-size: 0.78rem;
+    color: var(--text);
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+    transition: color 0.15s ease;
+  }
+  .fc-link:hover { color: var(--accent); }
+</style>

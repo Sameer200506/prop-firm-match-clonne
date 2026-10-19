@@ -1,0 +1,19 @@
+{
+  "slug": "surge-trader",
+  "name": "Surge Trader",
+  "logoInitials": "ST",
+  "vertical": "cfd",
+  "country": "Global",
+  "founded": 2022,
+  "rating": 4.1,
+  "reviewCount": 214,
+  "platforms": ["MT5"],
+  "assets": ["fx", "metals", "indices", "crypto"],
+  "leverage": { "fx": "1:100", "metals": "1:20", "indices": "1:20", "crypto": "1:2" },
+  "restrictedCountries": ["United States"],
+  "maxAllocation": 100000,
+  "lastUpdated": "2026-08-24",
+  "website": "https://surgetrader.com",
+  "summary": "Directory listing: 1-step CFD evaluations with a single profit target and instant scaling options.",
+  "estimated": true
+}

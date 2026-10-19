@@ -1,0 +1,36 @@
+{
+  "assets": [
+    "fx",
+    "metals",
+    "indices"
+  ],
+  "country": "Global",
+  "estimated": true,
+  "founded": 2021,
+  "lastUpdated": "2026-08-24",
+  "leverage": {
+    "fx": "1:100",
+    "indices": "1:20",
+    "metals": "1:20"
+  },
+  "logoInitials": "FX",
+  "maxAllocation": 200000,
+  "name": "FXify",
+  "platforms": [
+    "MT4",
+    "MT5"
+  ],
+  "rating": 4.3,
+  "restrictedCountries": [
+    "United States"
+  ],
+  "reviewCount": 305,
+  "scrape": {
+    "lastAttempt": "2026-08-25T11:24:10.400Z",
+    "status": "unchanged"
+  },
+  "slug": "fxify",
+  "summary": "Directory listing: established FX-focused firm with 1-step, 2-step and instant funding up to $200K.",
+  "vertical": "cfd",
+  "website": "https://fxify.com"
+}

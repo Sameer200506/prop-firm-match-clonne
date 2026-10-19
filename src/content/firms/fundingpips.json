@@ -1,0 +1,59 @@
+{
+  "assets": [
+    "fx",
+    "metals",
+    "indices",
+    "energy",
+    "crypto"
+  ],
+  "country": "United Arab Emirates",
+  "discount": {
+    "code": "PIP5",
+    "percentOff": 5
+  },
+  "estimated": false,
+  "founded": 2023,
+  "lastUpdated": "2026-08-24",
+  "leverage": {
+    "crypto": "1:2",
+    "fx": "1:100",
+    "indices": "1:20",
+    "metals": "1:20"
+  },
+  "logoInitials": "FP",
+  "maxAllocation": 100000,
+  "name": "FundingPips",
+  "payoutMethods": [
+    "Bank transfer",
+    "Crypto",
+    "Rise"
+  ],
+  "platforms": [
+    "MT4",
+    "MT5",
+    "cTrader",
+    "Match-Trade"
+  ],
+  "rating": 4.6,
+  "restrictedCountries": [
+    "United States",
+    "Iran",
+    "North Korea"
+  ],
+  "reviewCount": 1642,
+  "rules": {
+    "eas": true,
+    "newsTrading": "restricted",
+    "overnight": true,
+    "swapFree": true
+  },
+  "scrape": {
+    "detail": "bot protection (Cloudflare/WAF); existing data kept",
+    "lastAttempt": "2026-08-25T11:30:46.841Z",
+    "status": "blocked"
+  },
+  "slug": "fundingpips",
+  "summary": "Budget-friendly firm with fast on-demand payouts and both 1-step and 2-step evaluations, popular for low fees and flexible platform choice.",
+  "vertical": "cfd",
+  "website": "https://fundingpips.com"
+}

@@ -1,0 +1,49 @@
+{
+  "assets": [
+    "indices",
+    "energy",
+    "metals"
+  ],
+  "country": "United States",
+  "estimated": false,
+  "founded": 2012,
+  "lastUpdated": "2026-08-25",
+  "leverage": {
+    "energy": "1:15",
+    "indices": "1:20"
+  },
+  "logoInitials": "TS",
+  "maxAllocation": 150000,
+  "name": "Topstep",
+  "payoutMethods": [
+    "Bank transfer (ACH)",
+    "Payoneer"
+  ],
+  "platforms": [
+    "Tradovate",
+    "NinjaTrader",
+    "TradingView",
+    "Rithmic"
+  ],
+  "rating": 4.7,
+  "restrictedCountries": [
+    "Iran",
+    "North Korea",
+    "Cuba"
+  ],
+  "reviewCount": 2874,
+  "rules": {
+    "eas": true,
+    "newsTrading": true,
+    "overnight": "restricted",
+    "swapFree": false
+  },
+  "scrape": {
+    "lastAttempt": "2026-08-25T11:24:15.357Z",
+    "status": "updated"
+  },
+  "slug": "topstep",
+  "summary": "The pioneer of futures evaluations since 2012: a single-step Trading Combine with intraday trailing drawdown and payouts unlocked after five winning days.",
+  "vertical": "futures",
+  "website": "https://topstep.com"
+}

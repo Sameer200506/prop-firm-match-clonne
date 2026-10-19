@@ -1,0 +1,232 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import DiscountBadge from '../components/DiscountBadge.astro';
+import StarRating from '../components/StarRating.astro';
+import { formatUsd, formatUsdShort } from '../utils/format';
+
+const firms = await getCollection('firms');
+const offers = await getCollection('offers');
+const challenges = await getCollection('challenges');
+
+const firmBySlug = new Map(firms.map((f) => [f.data.slug, f.data]));
+
+const cards = offers
+  .map((offer) => {
+    const firm = firmBySlug.get(offer.data.firm);
+    const firmChallenges = challenges.filter(
+      (c) => c.data.firm === offer.data.firm,
+    );
+    // A representative challenge to anchor the strike-through price.
+    const discounted = firmChallenges.filter(
+      (c) => c.data.discountedPrice !== undefined,
+    );
+    const example =
+      discounted[0] ??
+      [...firmChallenges].sort(
+        (a, b) => (a.data.discountedPrice ?? a.data.price) - (b.data.discountedPrice ?? b.data.price),
+      )[0];
+    return { offer: offer.data, firm, example };
+  })
+  .filter((c) => c.firm)
+  .sort((a, b) => b.offer.percentOff - a.offer.percentOff);
+---
+
+<BaseLayout
+  title="Prop Firm Discounts & Promo Codes"
+  description="Every active prop firm promo code in one place — verified discount percentages, expiry dates and example challenge pricing so you pay the least possible."
+>
+  <section class="of-hero glow-field">
+    <div class="wrap">
+      <p class="kicker rise">Live codes</p>
+      <h1 class="rise" style="--d:0.06s">
+        Offers &amp; <span class="accent-text">discount codes</span>
+      </h1>
+      <p class="of-sub rise" style="--d:0.12s">
+        {cards.length} active promotions across our tracked firms. Copy the
+        code, apply it at checkout, and check the example fee to see your real
+        savings.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="offer-grid">
+        {cards.map((c, i) => (
+          <article class="panel of-card rise" style={`--d:${0.05 * i}s`}>
+            <header class="of-top">
+              <div class="of-firm">
+                <span class="logo-badge" aria-hidden="true">{c.firm!.logoInitials}</span>
+                <div class="of-firm-text">
+                  <h3>{c.firm!.name}</h3>
+                  <StarRating rating={c.firm!.rating} />
+                </div>
+              </div>
+              <DiscountBadge code={c.offer.code} percentOff={c.offer.percentOff} />
+            </header>
+
+            <p class="of-title">{c.offer.title}</p>
+
+            <div class="of-code-row">
+              <div class="of-code-block">
+                <span class="of-code-label mono">Promo code</span>
+                <span class="of-code mono" data-code={c.offer.code}>
+                  {c.offer.code}
+                </span>
+              </div>
+              <button class="btn btn-ghost copy-btn" type="button" data-copy={c.offer.code}>
+                Copy
+              </button>
+            </div>
+
+            {c.example && c.example.data.discountedPrice !== undefined && (
+              <p class="of-example mono">
+                e.g. {formatUsdShort(c.example.data.accountSize)} challenge:
+                <span class="strike">{formatUsd(c.example.data.price)}</span>
+                <span class="now">{formatUsd(c.example.data.discountedPrice)}</span>
+              </p>
+            )}
+
+            <footer class="of-foot">
+              {c.offer.expires ? (
+                <span class="mono of-exp">expires {c.offer.expires}</span>
+              ) : (
+                <span class="mono of-exp">no expiry listed</span>
+              )}
+              <a class="of-link mono" href={`/prop-firms/${c.offer.firm}/`}>
+                Firm profile →
+              </a>
+            </footer>
+          </article>
+        ))}
+      </div>
+
+      <p class="mono of-note">
+        Snapshot 2026-08-24 · codes can expire without notice — confirm at the
+        firm's checkout.
+      </p>
+    </div>
+  </section>
+
+  <script>
+    // Copy-to-clipboard for promo codes with visual feedback.
+    document.querySelectorAll<HTMLButtonElement>('.copy-btn').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const code = btn.dataset.copy ?? '';
+        try {
+          await navigator.clipboard.writeText(code);
+          const original = btn.textContent;
+          btn.textContent = 'Copied ✓';
+          btn.classList.add('copied');
+          window.setTimeout(() => {
+            btn.textContent = original;
+            btn.classList.remove('copied');
+          }, 1400);
+        } catch {
+          // Clipboard API unavailable — fall back to selecting the code text.
+          const target = document.querySelector<HTMLElement>(
+            `[data-code="${code}"]`,
+          );
+          if (target) window.getSelection()?.selectAllChildren(target);
+        }
+      });
+    });
+  </script>
+
+  <style>
+    .of-hero {
+      padding: clamp(56px, 8vw, 100px) 0 clamp(32px, 4vw, 48px);
+      border-bottom: 1px solid var(--line);
+    }
+    .of-hero h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); }
+    .of-sub { margin-top: 14px; color: var(--muted); max-width: 58ch; }
+
+    .offer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .of-card {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .of-card:hover { transform: translateY(-4px); border-color: var(--line-bright); }
+
+    .of-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+    .of-firm { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .of-firm-text { display: grid; gap: 3px; min-width: 0; }
+    .of-firm-text h3 { font-size: 1rem; }
+    .of-title { color: var(--text); font-weight: 500; font-size: 0.95rem; }
+
+    .of-code-row {
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+    }
+    .of-code-block {
+      flex: 1;
+      display: grid;
+      gap: 3px;
+      border: 1px dashed var(--line-bright);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      background: rgba(27, 42, 49, 0.2);
+    }
+    .of-code-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--faint);
+    }
+    .of-code {
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+    }
+    .copy-btn { align-self: center; font-size: 0.74rem; padding: 0.7em 1.2em; }
+    .copy-btn.copied { color: var(--accent); border-color: var(--accent); }
+
+    .of-example {
+      font-size: 0.78rem;
+      color: var(--muted);
+      border-top: 1px dashed var(--line);
+      padding-top: 12px;
+    }
+    .of-example .strike {
+      color: var(--faint);
+      text-decoration: line-through;
+      margin-inline: 8px 6px;
+    }
+    .of-example .now { color: var(--accent); font-weight: 600; }
+
+    .of-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+    .of-exp { font-size: 0.68rem; letter-spacing: 0.06em; color: var(--amber); }
+    .of-link { font-size: 0.78rem; color: var(--text); transition: color 0.15s ease; }
+    .of-link:hover { color: var(--accent); }
+
+    .of-note {
+      margin-top: 26px;
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      color: var(--faint);
+    }
+  </style>
+</BaseLayout>
